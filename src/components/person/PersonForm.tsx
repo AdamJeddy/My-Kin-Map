@@ -146,11 +146,11 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
   }, [childrenMap]);
 
   const ancestorsOfPerson = useMemo(() => {
-    return person?.id ? Array.from(collectAncestors(person.id, new Set([person.id]))).filter(pid => pid !== person.id) : [];
+    return person?.id ? Array.from(collectAncestors(person.id)).filter(pid => pid !== person.id) : [];
   }, [person?.id, collectAncestors]);
 
   const descendantsOfPerson = useMemo(() => {
-    return person?.id ? Array.from(collectDescendants(person.id, new Set([person.id]))).filter(pid => pid !== person.id) : [];
+    return person?.id ? Array.from(collectDescendants(person.id)).filter(pid => pid !== person.id) : [];
   }, [person?.id, collectDescendants]);
 
   const parentBlockedIds = useMemo(() => new Set<string>([...descendantsOfPerson, ...relationState.childIds, person?.id ?? ''].filter(Boolean)), [descendantsOfPerson, relationState.childIds, person?.id]);

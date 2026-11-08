@@ -13,8 +13,9 @@ import {
 } from '@/components/ui';
 import { PersonForm } from './PersonForm';
 import { useIsMobile } from '@/hooks';
-import { createPerson, updatePerson, updatePersonPhoto, usePersons, useFamilies, getPersonWithRelations, linkParentsToChild, linkSpouseAndChildren, removeChildFromFamily } from '@/db';
+import { createPerson, updatePerson, updatePersonPhoto, usePersons, useFamilies, getPersonWithRelations, db } from '@/db';
 import { useToast } from '@/hooks/useToast';
+import { reconcileRelationships } from '@/db/relationships';
 import type { Person, PersonFormData } from '@/types';
 
 interface PersonEditorProps {
@@ -27,6 +28,7 @@ interface PersonEditorProps {
 export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEditorProps) {
   const isMobile = useIsMobile();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [relationsReady, setRelationsReady] = useState(false);
   const persons = usePersons();
   const families = useFamilies();
   const { addToast } = useToast();
@@ -38,85 +40,38 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
 
   // Load existing relations when editing a person
   useEffect(() => {
+    let cancelled = false;
+    setRelationsReady(false);
     if (!person) {
       setRelationSelections({ parentIds: [], spouseId: undefined, childIds: [] });
-      return;
+      setRelationsReady(true);
+      return () => { cancelled = true; };
     }
 
     getPersonWithRelations(person.id).then((relations) => {
-      if (!relations) return;
+      if (!relations || cancelled) return;
       setRelationSelections({
         parentIds: relations.parents.map((p) => p.id).slice(0, 2),
         spouseId: relations.spouses[0]?.id,
         childIds: relations.children.map((c) => c.id),
       });
+      setRelationsReady(true);
+    }).catch(() => {
+      if (!cancelled) addToast({ type: 'error', title: 'Could not load relationships', description: 'Close and reopen this person to try again.' });
     });
-  }, [person]);
+    return () => { cancelled = true; };
+  }, [person, addToast]);
 
   const handleSubmit = useCallback(async (data: PersonFormData, photo: File | undefined, relations: { parentIds: string[]; spouseId?: string; childIds: string[] }) => {
     setIsSubmitting(true);
     try {
-      let savedPerson: Person;
-      
-      if (person) {
-        // Update existing person
-        await updatePerson(person.id, data);
-        savedPerson = { ...person, ...data };
-        
-        // Update photo if provided
-        if (photo) {
-          const photoBlob = new Blob([await photo.arrayBuffer()], { type: photo.type });
-          // Create thumbnail (simple version - just use same blob for now)
-          await updatePersonPhoto(person.id, photoBlob, photoBlob);
-        }
-      } else {
-        // Create new person
-        savedPerson = await createPerson(data);
-        
-        // Add photo if provided
-        if (photo) {
-          const photoBlob = new Blob([await photo.arrayBuffer()], { type: photo.type });
-          await updatePersonPhoto(savedPerson.id, photoBlob, photoBlob);
-        }
-      }
-
-      // Reconcile relationships after the person exists
-      const current = await getPersonWithRelations(savedPerson.id);
-
-      // Parents: if existing birth family differs from desired, remove and relink
-      const desiredParents = relations.parentIds.slice(0, 2);
-      const desiredParentSet = new Set(desiredParents);
-
-      if (current?.birthFamily) {
-        const currentParents = [current.birthFamily.spouse1Id, current.birthFamily.spouse2Id].filter(Boolean) as string[];
-        const sameParents = currentParents.length === desiredParents.length && currentParents.every(p => desiredParentSet.has(p));
-
-        if (!sameParents && current.birthFamily.childIds.includes(savedPerson.id)) {
-          await removeChildFromFamily(current.birthFamily.id, savedPerson.id);
-        }
-      }
-
-      if (desiredParents.length > 0) {
-        await linkParentsToChild(desiredParents, savedPerson.id);
-      }
-
-      // Spouse/children: remove children that are no longer selected from current spouse families
-      const desiredChildrenSet = new Set(relations.childIds);
-      if (current?.spouseFamilies) {
-        for (const fam of current.spouseFamilies) {
-          if (!fam.childIds || fam.childIds.length === 0) continue;
-          for (const childId of fam.childIds) {
-            if (!desiredChildrenSet.has(childId)) {
-              await removeChildFromFamily(fam.id, childId);
-            }
-          }
-        }
-      }
-
-      // Add missing children (and ensure spouse family exists)
-      if (relations.childIds.length > 0 || relations.spouseId) {
-        await linkSpouseAndChildren(savedPerson.id, relations.spouseId, relations.childIds);
-      }
+      const photoBlob = photo ? new Blob([await photo.arrayBuffer()], { type: photo.type }) : undefined;
+      const savedPerson = await db.transaction('rw', db.persons, db.families, async () => {
+        const saved = person ? (await updatePerson(person.id, data), { ...person, ...data }) : await createPerson(data);
+        if (photoBlob) await updatePersonPhoto(saved.id, photoBlob, photoBlob);
+        await reconcileRelationships(saved.id, relations);
+        return saved;
+      });
 
       onOpenChange(false);
       addToast({
@@ -133,12 +88,12 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
       addToast({
         type: 'error',
         title: 'Save failed',
-        description: 'Could not update this person. Please try again.',
+        description: error instanceof Error ? error.message : 'Could not update this person. Please try again.',
       });
     } finally {
       setIsSubmitting(false);
     }
-  }, [person, onOpenChange, onSaved]);
+  }, [person, onOpenChange, onSaved, addToast]);
 
   const handleCancel = useCallback(() => {
     onOpenChange(false);
@@ -166,7 +121,7 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
               relations={relationSelections}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || !relationsReady}
             />
           </div>
         </DrawerContent>
@@ -188,7 +143,7 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
           relations={relationSelections}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || !relationsReady}
         />
       </DialogContent>
     </Dialog>
