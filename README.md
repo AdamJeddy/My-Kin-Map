@@ -16,7 +16,7 @@ I couldn't find a family tree solution that met my needs: completely free, fully
 - **Relationship Tracking** - Define spouse, parent, and child relationships
 - **Smart Layout** - Automatic hierarchical layout with compound couple nodes for married pairs
 - **Local Storage** - Data persists in your browser with IndexedDB
-- **GEDCOM Import** - Import family trees from standard GEDCOM files
+- **JSON Backup** - Export and restore family data and photos
 - **Responsive Design** - Works on desktop and mobile devices
 
 ## Tech Stack
@@ -71,9 +71,9 @@ This creates an optimized build in the `dist/` directory.
 3. **View Tree** - The tree automatically layouts as you add relationships
 4. **Zoom & Pan** - Use mouse wheel to zoom, click and drag to pan around the tree
 
-### Your Data is Safe
+### Back up your data
 
-All information is stored locally in your browser's storage. No data is sent to any server. When you close the app, your data remains on your device, ready for your next visit.
+Family information is currently stored in this browser on this device. It is not automatically synced to another device. Clearing browser data or losing the device can remove it, so export a backup from Settings regularly and keep it somewhere safe. Importing a backup merges records and replaces existing records with matching IDs.
 
 ## Project Structure
 
@@ -103,6 +103,7 @@ src/
 - `npm run dev` - Start development server with HMR
 - `npm run build` - Build for production
 - `npm run lint` - Run ESLint
+- `npm test` - Run the automated tests
 - `npm run preview` - Preview production build locally
 
 ## Data Format
