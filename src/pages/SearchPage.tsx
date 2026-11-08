@@ -47,6 +47,7 @@ export function SearchPage() {
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              aria-label="Search people by name or place"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or place..."
@@ -70,7 +71,7 @@ export function SearchPage() {
               </p>
             </div>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y pb-24 md:pb-0">
               {filteredPersons.map((person) => {
                 const photoUrl = person.photoThumbnail 
                   ? URL.createObjectURL(person.photoThumbnail)

@@ -23,8 +23,8 @@ const LAYOUT_CONFIG: Record<'desktop' | 'mobile', LayoutConfig> = {
     spouseSpacing: 40,
   },
   mobile: {
-    nodeWidth: 120, // Reduced for mobile
-    nodeHeight: 80, // Reduced for mobile
+    nodeWidth: 140,
+    nodeHeight: 100,
     horizontalSpacing: 10, // More compact
     verticalSpacing: 100, // Reduced vertical spacing
     spouseSpacing: 15,
@@ -367,8 +367,8 @@ export function autoLayoutTree(
   nodes.forEach(node => {
     const isCoupleNode = node.type === 'couple';
     g.setNode(node.id, {
-      width: isCoupleNode ? config.nodeWidth : config.nodeWidth,
-      height: isCoupleNode ? config.nodeHeight : config.nodeHeight,
+      width: isCoupleNode ? (isMobile ? 160 : 300) : config.nodeWidth,
+      height: isCoupleNode ? (isMobile ? 170 : 240) : config.nodeHeight,
     });
   });
 
@@ -383,11 +383,12 @@ export function autoLayoutTree(
   // Update node positions with computed layout
   const layoutedNodes = nodes.map(node => {
     const pos = g.node(node.id);
+    const size = g.node(node.id);
     return {
       ...node,
       position: {
-        x: pos.x - config.nodeWidth / 2,
-        y: pos.y - config.nodeHeight / 2,
+        x: pos.x - size.width / 2,
+        y: pos.y - size.height / 2,
       },
     };
   });

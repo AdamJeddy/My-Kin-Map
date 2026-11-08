@@ -15,8 +15,8 @@ import { PanOnScrollMode } from '@xyflow/system';
 import '@xyflow/react/dist/style.css';
 import { LayoutGrid, LayoutList, ZoomIn, ZoomOut, Maximize, Zap } from 'lucide-react';
 
-import { PersonNode } from './PersonNode';
-import { CoupleNode } from './CoupleNode';
+import { PersonNode, type PersonNode as PersonFlowNode } from './PersonNode';
+import { CoupleNode, type CoupleNode as CoupleFlowNode } from './CoupleNode';
 import { generateTreeLayout, autoLayoutTree } from './layout';
 import { Button } from '@/components/ui';
 import { useIsMobile } from '@/hooks';
@@ -53,7 +53,7 @@ function FamilyTreeViewInner({
   const { fitView, zoomIn, zoomOut } = useReactFlow();
 
   // Inject click handlers into couple nodes
-  const injectHandlersIntoNodes = useCallback((nodes: any[]) => {
+  const injectHandlersIntoNodes = useCallback((nodes: (PersonFlowNode | CoupleFlowNode)[]): (PersonFlowNode | CoupleFlowNode)[] => {
     return nodes.map(node => {
       if (node.type === 'couple') {
         return {
@@ -73,7 +73,7 @@ function FamilyTreeViewInner({
   const initialLayout = useMemo(() => {
     const layout = generateTreeLayout(persons, families, rootPersonId, orientation, isMobile);
     return {
-      nodes: injectHandlersIntoNodes(layout.nodes),
+      nodes: injectHandlersIntoNodes(autoLayoutTree(layout.nodes, layout.edges, orientation, isMobile)),
       edges: layout.edges,
     };
   }, [persons, families, rootPersonId, orientation, isMobile, injectHandlersIntoNodes]);
@@ -89,17 +89,20 @@ function FamilyTreeViewInner({
 
   // Track previous orientation to detect changes
   const prevOrientationRef = useRef(orientation);
+  const topologyRef = useRef('');
 
   // Update nodes when persons/families/orientation changes
   useEffect(() => {
     const newLayout = generateTreeLayout(persons, families, rootPersonId, orientation, isMobile);
+    const topology = JSON.stringify([isMobile, newLayout.nodes.map(node => node.id).sort(), newLayout.edges.map(edge => edge.id).sort()]);
     
     // If orientation changed, apply auto-layout for better arrangement
-    if (prevOrientationRef.current !== orientation) {
+    if (prevOrientationRef.current !== orientation || topologyRef.current !== topology) {
       const layoutedNodes = autoLayoutTree(newLayout.nodes, newLayout.edges, orientation, isMobile);
       setNodes(injectHandlersIntoNodes(layoutedNodes));
       setEdges(newLayout.edges);
       prevOrientationRef.current = orientation;
+      topologyRef.current = topology;
       setTimeout(() => fitView({ padding: 0.2, duration: 500 }), 50);
     } else {
       // Preserve existing node positions when data changes to avoid full layout shuffle
@@ -151,8 +154,8 @@ function FamilyTreeViewInner({
 
   // Node click handlers
   const handleNodeClick = useCallback(
-    (_event: React.MouseEvent, node: any) => {
-      const person = node.data.person || node.data.person1;
+    (_event: React.MouseEvent, node: PersonFlowNode | CoupleFlowNode) => {
+      const person = node.type === 'person' ? node.data.person : node.data.person1;
       if (onPersonClick && person) {
         onPersonClick(person);
       }
@@ -161,8 +164,8 @@ function FamilyTreeViewInner({
   );
 
   const handleNodeDoubleClick = useCallback(
-    (_event: React.MouseEvent, node: any) => {
-      const person = node.data.person || node.data.person1;
+    (_event: React.MouseEvent, node: PersonFlowNode | CoupleFlowNode) => {
+      const person = node.type === 'person' ? node.data.person : node.data.person1;
       if (onPersonDoubleClick && person) {
         onPersonDoubleClick(person);
       }
@@ -209,11 +212,11 @@ function FamilyTreeViewInner({
         minZoom={0.1}
         maxZoom={2}
         zoomOnPinch={true}
-        panOnDrag={isMobile ? false : true}
+        panOnDrag
         panOnScroll={isMobile}
         panOnScrollMode={PanOnScrollMode.Free}
         selectionOnDrag={false}
-        nodesDraggable={true}
+        nodesDraggable={!isMobile}
         nodeDragThreshold={isMobile ? 0 : 10}
         elementsSelectable={true}
         nodesConnectable={false}

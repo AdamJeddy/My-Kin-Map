@@ -152,7 +152,7 @@ function CoupleNodeComponent({ data, selected }: CoupleNodeProps) {
   return (
     <div
       className={cn(
-        'px-4 py-3 rounded-lg border-2 bg-card shadow-md min-w-[280px]',
+        'px-4 py-3 rounded-lg border-2 bg-card shadow-md w-[300px]',
         'transition-all duration-200',
         selected && 'ring-2 ring-primary ring-offset-2',
         isRoot && 'border-primary',
