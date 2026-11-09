@@ -20,6 +20,7 @@ import {
   CardTitle,
 } from '@/components/ui';
 import { Zap, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface TreePageProps {
   onAddPerson?: () => void;
@@ -41,6 +42,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoadingSample, setIsLoadingSample] = useState(false);
+  const displayedPerson = persons?.find(person => person.id === selectedPerson?.id) ?? selectedPerson;
 
   // Initialize settings and request persistent storage on mount
   useEffect(() => {
@@ -161,18 +163,21 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
           </div>
         ) : (
           // Family tree view
-          <FamilyTreeView
-            persons={persons ?? []}
-            families={families ?? []}
-            onPersonClick={handlePersonClick}
-            onPersonDoubleClick={handlePersonDoubleClick}
-            onBackgroundClick={handleCloseDetails}
-          />
+          <>
+            <FamilyTreeView
+              persons={persons ?? []}
+              families={families ?? []}
+              onPersonClick={handlePersonClick}
+              onPersonDoubleClick={handlePersonDoubleClick}
+              onBackgroundClick={handleCloseDetails}
+            />
+            {isMobile && <Button asChild variant="outline" size="sm" className="absolute top-4 left-4 z-10"><Link to="/search">Find a person</Link></Button>}
+          </>
         )}
       </div>
 
       {/* Person Details Drawer (mobile) */}
-      {isMobile && selectedPerson && (
+      {isMobile && displayedPerson && (
         <Drawer open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
           <DrawerContent className="max-h-[80vh]">
             <DrawerHeader>
@@ -180,7 +185,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
             </DrawerHeader>
             <div className="overflow-y-auto px-4 pb-4">
               <PersonDetails
-                person={selectedPerson}
+                person={displayedPerson}
                 parents={personRelations?.parents}
                 spouses={personRelations?.spouses}
                 children={personRelations?.children}
@@ -197,10 +202,10 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
       )}
 
       {/* Person Details Panel (desktop) */}
-      {!isMobile && selectedPerson && isDetailsOpen && (
+      {!isMobile && displayedPerson && isDetailsOpen && (
         <div className="absolute top-4 right-4 w-80 max-h-[calc(100%-2rem)] overflow-y-auto bg-card/95 backdrop-blur-sm rounded-lg shadow-xl border border-border/80">
           <PersonDetails
-            person={selectedPerson}
+            person={displayedPerson}
             parents={personRelations?.parents}
             spouses={personRelations?.spouses}
             children={personRelations?.children}
@@ -216,7 +221,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
 
       {/* Person Editor */}
       <PersonEditor
-        person={selectedPerson ?? undefined}
+        person={displayedPerson ?? undefined}
         open={isEditing}
         onOpenChange={(open) => {
           if (!open) handleEditClose();

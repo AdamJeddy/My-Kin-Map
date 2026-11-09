@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search as SearchIcon, User } from 'lucide-react';
 import { MobileHeader } from '@/components/navigation';
-import { PersonEditor } from '@/components/person';
+import { PersonEditor, PersonDetails } from '@/components/person';
 import { useIsMobile } from '@/hooks';
-import { usePersons } from '@/db';
-import { Input, Avatar, AvatarFallback, AvatarImage } from '@/components/ui';
+import { getPersonWithRelations, usePersons } from '@/db';
+import { Input, Avatar, AvatarFallback, AvatarImage, Dialog, DialogContent, DialogHeader, DialogTitle, Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui';
 import type { Person } from '@/types';
 
 export function SearchPage() {
@@ -13,6 +13,16 @@ export function SearchPage() {
   const [query, setQuery] = useState('');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [relations, setRelations] = useState<Awaited<ReturnType<typeof getPersonWithRelations>>>(null);
+  const currentPerson = persons?.find(person => person.id === selectedPerson?.id) ?? selectedPerson;
+
+  useEffect(() => {
+    if (!currentPerson || !detailsOpen) return;
+    let cancelled = false;
+    getPersonWithRelations(currentPerson.id).then(result => { if (!cancelled) setRelations(result); });
+    return () => { cancelled = true; };
+  }, [currentPerson, detailsOpen]);
 
   // Filter persons based on search query
   const filteredPersons = useMemo(() => {
@@ -34,8 +44,15 @@ export function SearchPage() {
 
   const handlePersonClick = (person: Person) => {
     setSelectedPerson(person);
-    setIsEditing(true);
+    setRelations(null);
+    setDetailsOpen(true);
   };
+
+  const details = currentPerson && (
+    <PersonDetails person={currentPerson} parents={relations?.parents} spouses={relations?.spouses}
+      children={relations?.children} siblings={relations?.siblings} onPersonClick={handlePersonClick}
+      onEdit={() => { setDetailsOpen(false); setIsEditing(true); }} />
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -112,11 +129,26 @@ export function SearchPage() {
         </div>
       </div>
 
-      {/* Person Editor */}
+      {isMobile ? (
+        <Drawer open={detailsOpen} onOpenChange={setDetailsOpen}>
+          <DrawerContent className="max-h-[85vh]">
+            <DrawerHeader><DrawerTitle>Family member</DrawerTitle></DrawerHeader>
+            <div className="overflow-y-auto px-4 pb-6">{details}</div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>Family member</DialogTitle></DialogHeader>
+            {details}
+          </DialogContent>
+        </Dialog>
+      )}
+
       <PersonEditor
-        person={selectedPerson ?? undefined}
+        person={currentPerson ?? undefined}
         open={isEditing}
-        onOpenChange={setIsEditing}
+        onOpenChange={(open) => { setIsEditing(open); if (!open) setDetailsOpen(true); }}
       />
     </div>
   );

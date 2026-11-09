@@ -148,7 +148,7 @@ export function PersonDetails({
           </div>
           <div className="flex gap-1">
             {onEdit && (
-              <Button variant="ghost" size="icon" onClick={onEdit}>
+              <Button variant="ghost" size="icon" onClick={onEdit} aria-label="Edit person">
                 <Edit className="h-4 w-4" />
               </Button>
             )}
@@ -185,26 +185,25 @@ export function PersonDetails({
 
         {/* Relationships */}
         <div className="border-t pt-4 space-y-3">
-          {/* Spouses & Their Children */}
+          {/* Show children separately: the aggregated list does not identify each child's other parent. */}
           {spouses.length > 0 && (
             <RelationSection 
-              title="Family"
+              title="Partners"
               bgColor="bg-primary/5 border-primary/20"
             >
               <div className="space-y-3">
                 {spouses.map((spouse) => (
                   <div key={spouse.id}>
                     <PersonMiniCard p={spouse} />
-                    {children.length > 0 && (
-                      <div className="space-y-1 mt-2">
-                        {children.map((child) => (
-                          <PersonMiniCard key={child.id} p={child} indent />
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
+            </RelationSection>
+          )}
+
+          {children.length > 0 && (
+            <RelationSection title="Children" bgColor="bg-primary/5 border-primary/20">
+              {children.map((child) => <PersonMiniCard key={child.id} p={child} />)}
             </RelationSection>
           )}
 
