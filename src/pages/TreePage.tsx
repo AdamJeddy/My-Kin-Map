@@ -63,6 +63,10 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
     }
   }, []);
 
+  useEffect(() => {
+    if (selectedPerson && isDetailsOpen) loadPersonRelations(selectedPerson);
+  }, [families, selectedPerson, isDetailsOpen, loadPersonRelations]);
+
   const handlePersonClick = useCallback((person: Person) => {
     setSelectedPerson(person);
     loadPersonRelations(person);

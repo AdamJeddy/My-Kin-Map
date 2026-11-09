@@ -3,13 +3,14 @@ import { Search as SearchIcon, User } from 'lucide-react';
 import { MobileHeader } from '@/components/navigation';
 import { PersonEditor, PersonDetails } from '@/components/person';
 import { useIsMobile } from '@/hooks';
-import { getPersonWithRelations, usePersons } from '@/db';
+import { getPersonWithRelations, useFamilies, usePersons } from '@/db';
 import { Input, Avatar, AvatarFallback, AvatarImage, Dialog, DialogContent, DialogHeader, DialogTitle, Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui';
 import type { Person } from '@/types';
 
 export function SearchPage() {
   const isMobile = useIsMobile();
   const persons = usePersons();
+  const families = useFamilies();
   const [query, setQuery] = useState('');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -22,7 +23,7 @@ export function SearchPage() {
     let cancelled = false;
     getPersonWithRelations(currentPerson.id).then(result => { if (!cancelled) setRelations(result); });
     return () => { cancelled = true; };
-  }, [currentPerson, detailsOpen]);
+  }, [currentPerson, detailsOpen, families]);
 
   // Filter persons based on search query
   const filteredPersons = useMemo(() => {

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import type { Person } from '@/types';
+import { FamilyManager } from './FamilyManager';
 
 interface PersonDetailsProps {
   person: Person;
@@ -161,6 +162,7 @@ export function PersonDetails({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <FamilyManager person={person} />
         {/* Vital info */}
         <div className="space-y-2">
           {birthInfo && (
