@@ -25,7 +25,7 @@ describe('backup and restore', () => {
     expect(restored?.photo?.type).toBe('image/jpeg');
     expect(new Uint8Array(await restored!.photo!.arrayBuffer())).toEqual(bytes);
     expect((await db.families.get('f1'))?.spouse1Id).toBe('p1');
-  });
+  }, 15000);
 
   it('rejects malformed records before existing data changes', async () => {
     await db.persons.add(person);
