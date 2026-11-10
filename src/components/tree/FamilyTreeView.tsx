@@ -103,7 +103,7 @@ function FamilyTreeViewInner({
       setEdges(newLayout.edges);
       prevOrientationRef.current = orientation;
       topologyRef.current = topology;
-      setTimeout(() => fitView({ padding: 0.2, duration: 500 }), 50);
+      setTimeout(() => fitView({ padding: 0.2, minZoom: isMobile ? 0.7 : 0.65, duration: 500 }), 50);
     } else {
       // Preserve existing node positions when data changes to avoid full layout shuffle
       const preservedNodes = newLayout.nodes.map(node => {
@@ -121,7 +121,7 @@ function FamilyTreeViewInner({
     if (shouldAutoLayout && nodes.length > 0) {
       setTimeout(() => {
         setNodes((currentNodes) => autoLayoutTree(currentNodes, edges, orientation, isMobile));
-        setTimeout(() => fitView({ padding: 0.2, duration: 500 }), 100);
+        setTimeout(() => fitView({ padding: 0.2, minZoom: isMobile ? 0.7 : 0.65, duration: 500 }), 100);
       }, 100);
       localStorage.removeItem('triggerAutoLayout');
     }
@@ -137,7 +137,7 @@ function FamilyTreeViewInner({
   // Auto-layout handler
   const handleAutoLayout = useCallback(() => {
     setNodes((currentNodes) => autoLayoutTree(currentNodes, edges, orientation, isMobile));
-    setTimeout(() => fitView({ padding: 0.2, duration: 500 }), 50);
+    setTimeout(() => fitView({ padding: 0.2, minZoom: isMobile ? 0.7 : 0.65, duration: 500 }), 50);
   }, [edges, orientation, isMobile, setNodes, fitView]);
 
   const handleZoomIn = useCallback(() => {
@@ -196,7 +196,7 @@ function FamilyTreeViewInner({
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="tree-canvas w-full h-full">
       <ReactFlow
         style={{ touchAction: 'none' }}
         nodes={nodes}
@@ -208,7 +208,7 @@ function FamilyTreeViewInner({
         onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
+        fitViewOptions={{ padding: 0.2, minZoom: isMobile ? 0.7 : 0.65 }}
         minZoom={0.1}
         maxZoom={2}
         zoomOnPinch={true}
@@ -222,12 +222,12 @@ function FamilyTreeViewInner({
         nodesConnectable={false}
         aria-label="Family tree visualization"
       >
-        <Background gap={20} size={1} />
+        <Background gap={24} size={1} color="var(--canvas-dot)" />
 
         {edges.some(edge => edge.id.startsWith('partner-')) && (
           <Panel position="top-left" className={isMobile ? '!mt-14' : ''}>
             <div className="flex items-center gap-2 rounded-md border bg-background/95 px-3 py-2 text-xs text-muted-foreground shadow-sm">
-              <span className="w-5 border-t-2 border-dashed border-pink-400" aria-hidden="true" />
+              <span className="w-5 border-t-2 border-dashed border-[#bc7861]" aria-hidden="true" />
               Dashed line: partners
             </div>
           </Panel>

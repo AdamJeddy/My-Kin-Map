@@ -32,7 +32,7 @@ describe('family tree layout', () => {
       const layout = generateTreeLayout(sample.persons as unknown as Person[], sample.families as unknown as Family[], undefined, orientation, mobile);
       const nodes = autoLayoutTree(layout.nodes, layout.edges, orientation, mobile);
       const size = (type: string | undefined) => type === 'couple'
-        ? { width: mobile ? 160 : 300, height: mobile ? 170 : 240 }
+        ? { width: mobile ? 160 : 300, height: mobile ? 170 : 150 }
         : { width: mobile ? 140 : 200, height: mobile ? 100 : 140 };
       for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j], x = size(a.type), y = size(b.type);

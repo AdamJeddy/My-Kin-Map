@@ -128,15 +128,15 @@ export function PersonDetails({
   };
 
   return (
-    <Card className="bg-card/100 backdrop-blur-sm">
+    <Card className="border-0 bg-transparent shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
             {photoUrl && <AvatarImage src={photoUrl} alt={person.givenNames} />}
-            <AvatarFallback className="text-xl">{initials || '?'}</AvatarFallback>
+            <AvatarFallback className="bg-accent text-primary text-xl font-semibold">{initials || '?'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg">
+            <CardTitle className="font-display text-2xl leading-tight">
               {person.givenNames} {person.surname}
             </CardTitle>
             {person.birthName && person.birthName !== person.surname && (

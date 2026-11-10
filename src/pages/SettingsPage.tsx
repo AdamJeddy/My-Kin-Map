@@ -228,8 +228,9 @@ export function SettingsPage() {
   return (
     <div className="flex flex-col h-full">
       {isMobile && <MobileHeader title="Settings" />}
+      {!isMobile && <header className="border-b bg-card px-8 py-6"><h1 className="font-display text-[30px] leading-tight">Settings</h1><p className="mt-1 text-sm text-muted-foreground">Manage your preferences and family data.</p></header>}
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 md:pb-4">
+      <div className="flex-1 overflow-y-auto p-4 pb-8 md:p-8"><div className="mx-auto max-w-4xl space-y-4">
         {/* About */}
         <Card>
           <CardHeader>
@@ -385,7 +386,7 @@ export function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </div></div>
 
       {/* Clear Data Confirmation Dialog */}
       <Dialog open={showClearDataConfirm} onOpenChange={setShowClearDataConfirm}>

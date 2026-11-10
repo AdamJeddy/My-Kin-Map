@@ -1,6 +1,5 @@
 import { memo, useMemo } from 'react';
 import { Handle, Position, type Node } from '@xyflow/react';
-import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui';
 import type { Person } from '@/types';
@@ -58,13 +57,11 @@ function PersonNodeComponent({ data, selected }: PersonNodeProps) {
     return (
       <div
         className={cn(
-          'px-3 py-2 rounded-lg border-2 bg-card shadow-sm min-w-[100px] max-w-[140px]',
+          'px-3 py-2 rounded-xl border bg-card shadow-sm min-w-[120px] max-w-[140px]',
           'transition-all duration-200',
           selected && 'ring-2 ring-primary ring-offset-2',
           isRoot && 'border-primary',
-          !isRoot && 'border-border',
-          person.sex === 'M' && 'bg-blue-50 dark:bg-blue-950/30',
-          person.sex === 'F' && 'bg-pink-50 dark:bg-pink-950/30'
+          !isRoot && 'border-border'
         )}
       >
         {/* Handles for connections */}
@@ -82,13 +79,13 @@ function PersonNodeComponent({ data, selected }: PersonNodeProps) {
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8 flex-shrink-0">
             {photoUrl && <AvatarImage src={photoUrl} alt={person.givenNames} />}
-            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-accent text-primary text-xs font-semibold">{initials}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium truncate">
+            <p className="text-sm font-semibold truncate">
               {person.givenNames}
             </p>
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-sm text-muted-foreground truncate">
               {person.surname}
             </p>
           </div>
@@ -101,14 +98,12 @@ function PersonNodeComponent({ data, selected }: PersonNodeProps) {
   return (
     <div
       className={cn(
-        'px-4 py-3 rounded-lg border-2 bg-card shadow-md min-w-[160px] max-w-[200px]',
+        'px-4 py-3 rounded-xl border bg-card shadow-sm min-w-[180px] max-w-[200px]',
         'transition-all duration-200 cursor-pointer',
         'hover:shadow-lg',
         selected && 'ring-2 ring-primary ring-offset-2',
-        isRoot && 'border-primary border-[3px]',
-        !isRoot && 'border-border',
-        person.sex === 'M' && 'bg-blue-50 dark:bg-blue-950/30',
-        person.sex === 'F' && 'bg-pink-50 dark:bg-pink-950/30'
+        isRoot && 'border-primary',
+        !isRoot && 'border-border'
       )}
     >
       {/* Handles for connections */}
@@ -126,15 +121,13 @@ function PersonNodeComponent({ data, selected }: PersonNodeProps) {
       <div className="flex items-start gap-3">
         <Avatar className="h-12 w-12 flex-shrink-0">
           {photoUrl && <AvatarImage src={photoUrl} alt={person.givenNames} />}
-          <AvatarFallback>
-            {photoUrl ? initials : <User className="h-6 w-6" />}
-          </AvatarFallback>
+          <AvatarFallback className="bg-accent text-primary font-semibold">{initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold truncate">
+          <p className="text-base font-semibold truncate">
             {person.givenNames}
           </p>
-          <p className="text-sm text-muted-foreground truncate">
+          <p className="text-base text-muted-foreground truncate">
             {person.surname}
             {person.birthName && person.birthName !== person.surname && (
               <span className="text-xs"> (née {person.birthName})</span>

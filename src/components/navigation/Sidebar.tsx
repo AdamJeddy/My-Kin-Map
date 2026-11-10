@@ -1,97 +1,37 @@
 import { NavLink } from 'react-router-dom';
-import { TreePine, Search, Settings, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Network, Search, Settings, Plus, ChevronLeft, ChevronRight, Sprout, LockKeyhole } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
-interface SidebarProps {
-  onAddClick?: () => void;
-}
+interface SidebarProps { onAddClick?: () => void }
 
 export function Sidebar({ onAddClick }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-
-  const navItems = [
-    { to: '/', icon: TreePine, label: 'Family Tree' },
-    { to: '/search', icon: Search, label: 'Search' },
+  const items = [
+    { to: '/', icon: Network, label: 'Family tree' },
+    { to: '/search', icon: Search, label: 'People' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ];
-
   return (
-    <aside
-      className={cn(
-        'h-screen bg-background/95 border-r border-border flex flex-col transition-all duration-300',
-        collapsed ? 'w-16' : 'w-64'
-      )}
-    >
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b">
-        {!collapsed && (
-          <h1 className="font-semibold text-lg">My Kin Map</h1>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          style={{
-            color: 'hsl(var(--foreground))',
-            backgroundColor: 'transparent',
-          }}
-          className={cn('p-2 rounded-lg transition-colors hover:bg-slate-400/20', collapsed && 'mx-auto')}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
+    <aside className={cn('h-screen shrink-0 bg-[#193c2d] text-[#f5f5e9] flex flex-col transition-[width] duration-200', collapsed ? 'w-20' : 'w-64')}>
+      <div className={cn('flex items-center gap-3 px-5 pt-7 pb-8', collapsed && 'px-4 justify-center')}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#dbe8cb] text-[#234d36]"><Sprout className="h-5 w-5" /></span>
+        {!collapsed && <div><div className="font-display text-xl leading-none">My Kin Map</div><p className="mt-1 text-[11px] text-[#c1d2c3]">Your family, connected</p></div>}
+      </div>
+      <div className="px-3">
+        <button onClick={onAddClick} aria-label="Add person" className={cn('flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#dfebd3] px-3 text-sm font-semibold text-[#1b412d] hover:bg-white transition-colors', collapsed && 'px-0')}>
+          <Plus className="h-4 w-4" />{!collapsed && 'Add a person'}
         </button>
       </div>
-
-      {/* Add Button */}
-      <div className="p-3">
-        <button
-          onClick={onAddClick}
-          style={{
-            backgroundColor: 'hsl(var(--primary) / 0.85)',
-            color: 'hsl(var(--primary-foreground))',
-          }}
-          className={cn(
-            'w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium',
-            'hover:opacity-90 active:opacity-75',
-            collapsed && 'px-0'
-          )}
-        >
-          <Plus className="h-4 w-4" />
-          {!collapsed && <span>Add Person</span>}
-        </button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
-        {navItems.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
-                'text-foreground/75 hover:text-foreground hover:bg-muted/70',
-                isActive && 'bg-primary/20 text-primary font-semibold',
-                collapsed && 'justify-center'
-              )
-            }
-            title={collapsed ? label : undefined}
-          >
-            <Icon className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && <span className="font-medium">{label}</span>}
-          </NavLink>
-        ))}
+      <nav aria-label="Main navigation" className="flex-1 px-3 pt-8 space-y-1">
+        {!collapsed && <p className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-[#b2c8b7]">EXPLORE</p>}
+        {items.map(({to, icon: Icon, label}) => <NavLink key={to} to={to} end={to === '/'} title={collapsed ? label : undefined} className={({isActive}) => cn('flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm transition-colors text-[#d0ded1] hover:bg-white/10 hover:text-white', isActive && 'bg-white/14 text-white font-semibold', collapsed && 'justify-center')}><Icon className="h-[18px] w-[18px] shrink-0" />{!collapsed && label}</NavLink>)}
       </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t">
-        {!collapsed && (
-          <p className="text-xs text-foreground/60 text-center">
-            Your data stays on your device
-          </p>
-        )}
+      <div className="mx-3 border-t border-white/15 py-4">
+        {!collapsed && <div className="flex items-center gap-2 px-3 pb-4 text-xs text-[#c0d1c3]"><LockKeyhole className="h-3.5 w-3.5" /> Stored on this device</div>}
+        <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'} className={cn('flex min-h-11 items-center gap-2 rounded-lg px-3 text-xs text-[#d0ded1] hover:bg-white/10', collapsed && 'mx-auto')}>
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <><ChevronLeft className="h-4 w-4" /> Collapse sidebar</>}
+        </button>
       </div>
     </aside>
   );

@@ -96,7 +96,7 @@ export function generateTreeLayout(
     if (edgeIds.has(id)) return;
     edgeIds.add(id);
     edges.push({ id, source: sourceNode, target: targetNode, type: 'smoothstep',
-      style: { stroke: spouse ? '#f472b6' : '#94a3b8', strokeWidth: spouse ? 3 : 2, strokeDasharray: spouse ? '5,5' : undefined } });
+      style: { stroke: spouse ? '#bc7861' : '#829787', strokeWidth: spouse ? 3 : 2, strokeDasharray: spouse ? '5,5' : undefined } });
   };
   // Construct links from every family, independent of which person happens to be first.
   for (const family of families) {
@@ -137,7 +137,7 @@ export function autoLayoutTree(
     const isCoupleNode = node.type === 'couple';
     g.setNode(node.id, {
       width: isCoupleNode ? (isMobile ? 160 : 300) : config.nodeWidth,
-      height: isCoupleNode ? (isMobile ? 170 : 240) : config.nodeHeight,
+      height: isCoupleNode ? (isMobile ? 170 : 150) : config.nodeHeight,
     });
   });
 
