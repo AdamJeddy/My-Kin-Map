@@ -223,6 +223,15 @@ function FamilyTreeViewInner({
         aria-label="Family tree visualization"
       >
         <Background gap={20} size={1} />
+
+        {edges.some(edge => edge.id.startsWith('partner-')) && (
+          <Panel position="top-left" className={isMobile ? '!mt-14' : ''}>
+            <div className="flex items-center gap-2 rounded-md border bg-background/95 px-3 py-2 text-xs text-muted-foreground shadow-sm">
+              <span className="w-5 border-t-2 border-dashed border-pink-400" aria-hidden="true" />
+              Dashed line: partners
+            </div>
+          </Panel>
+        )}
         
         {/* Controls - desktop only */}
         {!isMobile && (
