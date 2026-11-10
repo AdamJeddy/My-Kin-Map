@@ -12,6 +12,8 @@
 - Automated tests cover backup round trips, invalid records, broken references, transaction rollback, relationship preservation and cycles, and sample layout geometry in both orientations and viewport modes.
 - Browser check: exported the bundled sample, imported that backup over the same sample records, observed a successful reload, and confirmed the people remained searchable. This did not test restoration into an empty database, photos, another browser or a physical device.
 - Family-group browser checks used disposable sample data at desktop and mobile viewport sizes: removed and restored a child link, checked the partner-change acknowledgement, and confirmed that a conflicting second parent group is rejected with an explanation. Automated tests cover group isolation, cycle and duplicate rejection, stale writes, marriage details and partner ordering. Physical touch interaction and assistive technology remain untested.
+- Person profiles now offer **Add child** and **Add partner**, preselecting the relationship while allowing the user to choose an additional parent. Browser checks created a disposable child on mobile and partner on desktop, and verified their profile links. The legacy editor now rejects assigning an existing child to a second parent group.
+- The tree now derives links from every family record rather than only the first person's traversal; people with multiple family groups are not incorrectly collapsed into a couple. A regression test covers first-person ordering, multiple partners and a single-parent child. Separated partner links are dashed and have a legend. Complex layouts can still be crowded, and placement of partner cards and crossing lines needs further design work.
 
 ## Remaining before a public beta
 

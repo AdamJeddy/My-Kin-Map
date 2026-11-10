@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Edit, Trash2, ChevronRight, CircleDot } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Edit, Trash2, ChevronRight, CircleDot, UserPlus } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { Person } from '@/types';
 import { FamilyManager } from './FamilyManager';
+import { PersonEditor } from './PersonEditor';
 
 interface PersonDetailsProps {
   person: Person;
@@ -35,6 +36,7 @@ export function PersonDetails({
   onDelete,
   onPersonClick,
 }: PersonDetailsProps) {
+  const [relativeType, setRelativeType] = useState<'child' | 'partner' | null>(null);
   // Create photo URL
   const photoUrl = useMemo(() => {
     if (person.photo) {
@@ -162,6 +164,10 @@ export function PersonDetails({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" onClick={() => setRelativeType('child')}><UserPlus className="h-4 w-4 mr-2" />Add child</Button>
+          <Button variant="outline" onClick={() => setRelativeType('partner')}><UserPlus className="h-4 w-4 mr-2" />Add partner</Button>
+        </div>
         <FamilyManager person={person} />
         {/* Vital info */}
         <div className="space-y-2">
@@ -238,6 +244,7 @@ export function PersonDetails({
           )}
         </div>
       </CardContent>
+      {relativeType && <PersonEditor open newRelative={{ person, type: relativeType }} onOpenChange={(open) => { if (!open) setRelativeType(null); }} onSaved={onPersonClick} />}
     </Card>
   );
 }

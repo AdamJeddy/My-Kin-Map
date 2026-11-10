@@ -20,18 +20,21 @@ import type { Person, PersonFormData } from '@/types';
 
 interface PersonEditorProps {
   person?: Person;
+  newRelative?: { person: Person; type: 'child' | 'partner' };
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved?: (person: Person) => void;
 }
 
-export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEditorProps) {
+export function PersonEditor({ person, newRelative, open, onOpenChange, onSaved }: PersonEditorProps) {
   const isMobile = useIsMobile();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [relationsReady, setRelationsReady] = useState(false);
   const persons = usePersons();
   const families = useFamilies();
   const { addToast } = useToast();
+  const relativePersonId = newRelative?.person.id;
+  const relativeType = newRelative?.type;
   const [relationSelections, setRelationSelections] = useState<{ parentIds: string[]; spouseId?: string; childIds: string[] }>({
     parentIds: [],
     spouseId: undefined,
@@ -43,7 +46,11 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
     let cancelled = false;
     setRelationsReady(false);
     if (!person) {
-      setRelationSelections({ parentIds: [], spouseId: undefined, childIds: [] });
+      setRelationSelections({
+        parentIds: relativeType === 'child' && relativePersonId ? [relativePersonId] : [],
+        spouseId: relativeType === 'partner' ? relativePersonId : undefined,
+        childIds: [],
+      });
       setRelationsReady(true);
       return () => { cancelled = true; };
     }
@@ -60,7 +67,7 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
       if (!cancelled) addToast({ type: 'error', title: 'Could not load relationships', description: 'Close and reopen this person to try again.' });
     });
     return () => { cancelled = true; };
-  }, [person, addToast]);
+  }, [person, relativePersonId, relativeType, addToast]);
 
   const handleSubmit = useCallback(async (data: PersonFormData, photo: File | undefined, relations: { parentIds: string[]; spouseId?: string; childIds: string[] }) => {
     setIsSubmitting(true);
@@ -77,7 +84,7 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
       addToast({
         type: 'success',
         title: 'Saved',
-        description: `${savedPerson.givenNames} ${savedPerson.surname} updated.`,
+        description: `${savedPerson.givenNames} ${savedPerson.surname} ${person ? 'updated' : 'added'}.`,
         duration: 1500,
       });
       if (onSaved) {
@@ -99,10 +106,14 @@ export function PersonEditor({ person, open, onOpenChange, onSaved }: PersonEdit
     onOpenChange(false);
   }, [onOpenChange]);
 
-  const title = person ? 'Edit Person' : 'Add Person';
+  const title = person ? 'Edit Person' : newRelative ? `Add ${newRelative.type}` : 'Add Person';
   const description = person 
     ? `Update details for ${person.givenNames} ${person.surname}`
-    : 'Add a new person to your family tree';
+    : newRelative?.type === 'child'
+      ? `${newRelative.person.givenNames} is preselected as a parent. You can select another parent below.`
+      : newRelative?.type === 'partner'
+        ? `Add a partner for ${newRelative.person.givenNames}.`
+        : 'Add a new person to your family tree';
 
   // Use Drawer on mobile, Dialog on desktop
   if (isMobile) {
