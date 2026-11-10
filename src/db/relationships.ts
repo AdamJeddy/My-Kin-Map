@@ -37,6 +37,9 @@ export async function reconcileRelationships(personId: string, selection: Relati
   }
   const existingSpouses = new Set(current.spouses.map(person => person.id));
   const existingChildren = new Set(current.spouseFamilies.flatMap(family => family.childIds));
+  if (selection.childIds.some(id => !existingChildren.has(id) && families.some(family => family.childIds.includes(id)))) {
+    throw new Error('A selected child already belongs to another family group. Update that group first.');
+  }
   const currentParents = [current.birthFamily?.spouse1Id, current.birthFamily?.spouse2Id].filter(Boolean) as string[];
   const sameParents = currentParents.length === selection.parentIds.length && currentParents.every(id => selection.parentIds.includes(id));
   const sameChildren = existingChildren.size === selection.childIds.length && selection.childIds.every(id => existingChildren.has(id));
