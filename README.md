@@ -29,7 +29,7 @@ My Kin Map is an early family tree application for bringing family relationships
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 20.19+, 22.12+, or 24+ (the supported LTS lines for the build and test tools)
 - npm or yarn
 
 ### Installation
