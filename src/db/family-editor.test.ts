@@ -15,6 +15,17 @@ beforeEach(async () => {
 });
 
 describe('family group editing', () => {
+  it('allows the last child to be removed from an existing single-parent group and moved elsewhere', async () => {
+    await db.families.add({ ...base, id: 'single', spouse1Id: 'a', childIds: ['z'], type: 'unknown' });
+    await saveFamilyGroup('a', { familyId: 'single', expectedRevision: 'rev', childIds: [] });
+    expect((await db.families.get('single'))?.childIds).toEqual([]);
+    await saveFamilyGroup('p', { familyId: 'f2', expectedRevision: 'rev', partnerId: 'b', childIds: ['y', 'z'] });
+    expect((await db.families.get('f2'))?.childIds).toEqual(['y', 'z']);
+  });
+  it('still rejects creating a new empty group', async () => {
+    await expect(saveFamilyGroup('a', { childIds: [] })).rejects.toThrow('Choose a partner or children');
+    expect(await db.families.count()).toBe(2);
+  });
   it('updates one partnership without changing another', async () => {
     await saveFamilyGroup('p', { familyId: 'f1', expectedRevision: 'rev', partnerId: 'a', childIds: [] });
     expect((await db.families.get('f1'))?.childIds).toEqual([]);

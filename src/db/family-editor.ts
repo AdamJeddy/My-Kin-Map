@@ -18,7 +18,7 @@ export async function saveFamilyGroup(personId: string, input: FamilyGroupInput)
     if (existing && oldPartner !== input.partnerId && (existing.type !== 'unknown' || existing.marriageDate || existing.divorceDate)) {
       throw new Error('This group has marriage or partnership details. Create a separate group to preserve its history.');
     }
-    if ((!input.partnerId && input.childIds.length === 0) || input.partnerId === personId || input.childIds.includes(personId) ||
+    if ((!existing && !input.partnerId && input.childIds.length === 0) || input.partnerId === personId || input.childIds.includes(personId) ||
         (input.partnerId && input.childIds.includes(input.partnerId)) || new Set(input.childIds).size !== input.childIds.length) throw new Error('Choose a partner or children, and make sure each person has one role.');
     const ids = [personId, ...(input.partnerId ? [input.partnerId] : []), ...input.childIds];
     const people = await db.persons.bulkGet(ids);
