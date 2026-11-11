@@ -1,9 +1,7 @@
 # My Kin Map
 ## Why I Built This
 
-I couldn't find a family tree solution that met my needs: completely free, fully secure, and with complete data ownership. Most existing tools either charge money, store your sensitive family information on their servers, or make it difficult to export your data. 
-
-**My Kin Map is different.** Everything runs in your browser. Your family data never leaves your device it's stored locally using IndexedDB. You have complete control over your information, and you can export it anytime for backup or future use.
+My Kin Map is an early family tree application for bringing family relationships and memories together. It currently stores family records in this browser using IndexedDB and supports JSON backup and restore. There is no account or automatic cross-device sync in the current implementation.
 
 **Live Demo:** [https://my-kin-map.vercel.app/](https://my-kin-map.vercel.app/)
 
@@ -66,10 +64,10 @@ This creates an optimized build in the `dist/` directory.
 
 ### Creating a Family Tree
 
-1. **Add People** - Use the "Add Person" button to create family members
-2. **Link Relationships** - Connect people with spouse, parent, and child relationships
-3. **View Tree** - The tree automatically layouts as you add relationships
-4. **Zoom & Pan** - Use mouse wheel to zoom, click and drag to pan around the tree
+1. **Add people** - Use the add button to create family members, or explore with the sample data.
+2. **Link relationships** - Open a person's profile to add relatives or manage individual family groups.
+3. **Explore** - Use the tree and people list to find a person; zoom and pan the tree as needed.
+4. **Back up** - Export a JSON backup from Settings and keep it somewhere safe.
 
 ### Back up your data
 
@@ -85,12 +83,13 @@ src/
 │   │   ├── PersonNode.tsx        # Individual person node
 │   │   ├── CoupleNode.tsx        # Married couple compound node
 │   │   └── layout.ts             # Tree layout algorithm
-│   ├── form/              # Data entry forms
+│   ├── person/            # Profiles and relationship editing
 │   └── ui/                # Reusable UI components
 ├── lib/
-│   ├── db.ts              # IndexedDB schema and operations
-│   ├── gedcom.ts          # GEDCOM import/export
+│   ├── backup.ts          # JSON backup validation and restore
+│   ├── gedcom/            # GEDCOM utilities (not exposed in the UI)
 │   └── utils.ts           # Utility functions
+├── db/                    # IndexedDB schema and relationship operations
 ├── types/
 │   └── index.ts           # TypeScript type definitions
 └── App.tsx                # Main app component
@@ -108,27 +107,18 @@ src/
 
 ## Data Format
 
-The app stores family data with the following structure:
+The current model keeps people and family groups as separate records. See `src/types/index.ts` for the actual types and `src/lib/backup.ts` for the JSON backup format and restore validation. GEDCOM utilities exist but are not currently exposed as a supported import/export flow.
 
-```typescript
-interface Person {
-  id: string;
-  firstName: string;
-  lastName: string;
-  birthDate?: string;
-  deathDate?: string;
-  spouseIds: string[];
-  parentIds: string[];
-  childIds: string[];
-}
-```
+## Project handover
+
+- [Implementation handover](docs/revival-review/HANDOVER.md): changes, verification, limitations and suggested next work.
+- [Implementation status](docs/revival-review/IMPLEMENTATION-STATUS.md): detailed progress since the original assessment.
+- [Revival review and product plan](docs/revival-review/REPORT.md): original findings and product opportunities; some findings have since been addressed.
+- [Product direction](PRODUCT.md) and [design direction](DESIGN.md).
 
 ## Contributing
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest features
-- Submit pull requests
+Please review the repository's license before using or contributing code.
 
 ## Roadmap
 
@@ -140,7 +130,7 @@ Contributions are welcome! Feel free to:
 
 ## Support
 
-For issues, questions, or feedback, please open an issue on GitHub or reach out through the contact form on the live site.
+For issues, questions, or feedback, please open an issue on GitHub.
 
 ---
 
