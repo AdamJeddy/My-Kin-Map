@@ -90,7 +90,7 @@ export function PersonDetails({
       <button
         onClick={() => onPersonClick?.(p)}
         className={cn(
-          "flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors text-left w-full",
+          "flex min-h-11 items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors text-left w-full",
           indent && "ml-4"
         )}
       >
@@ -107,19 +107,17 @@ export function PersonDetails({
     );
   };
 
-  // Render relation section with card styling
+  // Keep related people easy to scan without nesting extra cards.
   const RelationSection = ({ 
     title, 
-    bgColor = 'bg-muted/50',
     children: content,
   }: { 
     title: string; 
-    bgColor?: string;
     children: React.ReactNode;
   }) => {
     return (
-      <div className={cn('rounded-lg p-3 border', bgColor)}>
-        <h4 className="text-sm font-semibold text-foreground mb-3">
+      <div className="border-t pt-4">
+        <h4 className="text-sm font-semibold text-foreground mb-1">
           {title}
         </h4>
         {content}
@@ -165,40 +163,14 @@ export function PersonDetails({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" onClick={() => setRelativeType('child')}><UserPlus className="h-4 w-4 mr-2" />Add child</Button>
-          <Button variant="outline" onClick={() => setRelativeType('partner')}><UserPlus className="h-4 w-4 mr-2" />Add partner</Button>
+          <Button variant="outline" className="min-w-0 px-2" onClick={() => setRelativeType('child')}><UserPlus className="h-4 w-4 shrink-0 mr-1" />Add child</Button>
+          <Button variant="outline" className="min-w-0 px-2" onClick={() => setRelativeType('partner')}><UserPlus className="h-4 w-4 shrink-0 mr-1" />Add partner</Button>
         </div>
-        <FamilyManager person={person} />
-        {/* Vital info */}
-        <div className="space-y-2">
-          {birthInfo && (
-            <p className="text-sm">
-              <span className="text-muted-foreground">Born:</span> {birthInfo}
-            </p>
-          )}
-          {deathInfo && (
-            <p className="text-sm">
-              <span className="text-muted-foreground">Died:</span> {deathInfo}
-            </p>
-          )}
-        </div>
-
-        {/* Notes */}
-        {person.notes && (
-          <div className="space-y-1">
-            <h4 className="text-sm font-medium text-muted-foreground">Notes</h4>
-            <p className="text-sm whitespace-pre-wrap">{person.notes}</p>
-          </div>
-        )}
-
         {/* Relationships */}
-        <div className="border-t pt-4 space-y-3">
+        <div className="space-y-3">
           {/* Show children separately: the aggregated list does not identify each child's other parent. */}
           {spouses.length > 0 && (
-            <RelationSection 
-              title="Partners"
-              bgColor="bg-primary/5 border-primary/20"
-            >
+            <RelationSection title="Partners">
               <div className="space-y-3">
                 {spouses.map((spouse) => (
                   <div key={spouse.id}>
@@ -210,17 +182,14 @@ export function PersonDetails({
           )}
 
           {children.length > 0 && (
-            <RelationSection title="Children" bgColor="bg-primary/5 border-primary/20">
+            <RelationSection title="Children">
               {children.map((child) => <PersonMiniCard key={child.id} p={child} />)}
             </RelationSection>
           )}
 
           {/* Parents */}
           {parents.length > 0 && (
-            <RelationSection 
-              title="Parents"
-              bgColor="bg-secondary/5 border-secondary/20"
-            >
+            <RelationSection title="Parents">
               <div className="space-y-2">
                 {parents.map((parent) => (
                   <PersonMiniCard key={parent.id} p={parent} />
@@ -231,10 +200,7 @@ export function PersonDetails({
 
           {/* Siblings */}
           {siblings.length > 0 && (
-            <RelationSection 
-              title="Siblings"
-              bgColor="bg-secondary/5 border-secondary/20"
-            >
+            <RelationSection title="Siblings">
               <div className="space-y-2">
                 {siblings.map((sibling) => (
                   <PersonMiniCard key={sibling.id} p={sibling} />
@@ -243,6 +209,12 @@ export function PersonDetails({
             </RelationSection>
           )}
         </div>
+        {(birthInfo || deathInfo || person.notes) && <div className="space-y-2 border-t pt-4 text-sm">
+          {birthInfo && <p><span className="text-muted-foreground">Born:</span> {birthInfo}</p>}
+          {deathInfo && <p><span className="text-muted-foreground">Died:</span> {deathInfo}</p>}
+          {person.notes && <div className="pt-1"><h4 className="font-medium text-muted-foreground">Notes</h4><p className="mt-1 whitespace-pre-wrap">{person.notes}</p></div>}
+        </div>}
+        <FamilyManager person={person} />
       </CardContent>
       {relativeType && <PersonEditor open newRelative={{ person, type: relativeType }} onOpenChange={(open) => { if (!open) setRelativeType(null); }} onSaved={onPersonClick} />}
     </Card>
