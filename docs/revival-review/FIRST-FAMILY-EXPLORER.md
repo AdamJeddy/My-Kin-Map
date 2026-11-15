@@ -7,12 +7,14 @@
 - On mobile, the Tree page opens on a person-focused Family view. A person selector, relationship links and a back action make it possible to move through immediate family members without zooming the full graph. The Tree control switches to the existing canvas; switching back preserves the current selection during the visit.
 - Once the first person is created, the mobile view points to the existing child and partner actions. Desktop shows an unobtrusive prompt to open the first person's profile and add a connection. These actions use the existing person editor and relationship rules; they do not introduce a new family model or automatic parent inference.
 - The focused view reloads relationships when family data changes, ignores late responses after navigation, and offers a retry when loading fails. It uses the same profile and family group editor as the rest of the app.
+- Fixed an existing first-load race that could produce an IndexedDB constraint error when settings initialization ran concurrently. Initialization is now transactional and does not overwrite existing preferences.
 
 ## Verification
 
 - In a 390 × 844 emulated mobile browser, created a first person and a child, verified the preselected parent and relationship, navigated to the child and back, switched between Family and Tree, and confirmed the selected person remained selected.
 - In a desktop browser, created a first person and followed the new connection prompt into their profile. Checked the prompt did not cover the canvas controls.
 - Exported a disposable two-person family and restored it into an empty database on a different local browser origin. Both people and the parent-child relationship appeared. Separately exported a person with a small PNG and restored it into another empty local origin; the photo appeared on the restored profile.
+- All 27 automated tests and the production build passed; focused lint checks passed. A fresh local browser origin loaded without console errors after the settings initialization fix.
 - These are local browser-origin checks, not cross-device or cross-browser tests. Large photos, older backups, storage quota failures, physical-device interactions and assistive technology still need direct verification. Existing automated backup tests cover image bytes and MIME type, invalid data and rollback.
 
 ## Follow-up

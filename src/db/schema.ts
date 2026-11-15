@@ -55,12 +55,12 @@ export const DEFAULT_SETTINGS: Settings = {
 
 // Initialize default settings if not present
 export async function initializeSettings(): Promise<Settings> {
-  const existing = await db.settings.get('user-settings');
-  if (!existing) {
+  return db.transaction('rw', db.settings, async () => {
+    const existing = await db.settings.get('user-settings');
+    if (existing) return existing;
     await db.settings.add(DEFAULT_SETTINGS);
     return DEFAULT_SETTINGS;
-  }
-  return existing;
+  });
 }
 
 // Load sample/test data
