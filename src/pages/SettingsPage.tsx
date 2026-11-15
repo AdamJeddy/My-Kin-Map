@@ -231,30 +231,6 @@ export function SettingsPage() {
       {!isMobile && <header className="border-b bg-card px-8 py-6"><h1 className="font-display text-[30px] leading-tight">Settings</h1><p className="mt-1 text-sm text-muted-foreground">Manage your preferences and family data.</p></header>}
       
       <div className="flex-1 overflow-y-auto p-4 pb-8 md:p-8"><div className="mx-auto max-w-4xl space-y-4">
-        {/* About */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              About
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>
-              <strong>My Kin Map</strong> is a local-first family tree application.
-            </p>
-            <div className="flex items-start gap-2">
-              <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <p>
-                Your data stays on your device. We don't collect or store any personal information on servers.
-              </p>
-            </div>
-            <p className="pt-2 border-t">
-              Version 1.0.0
-            </p>
-          </CardContent>
-        </Card>
-
         {/* Appearance */}
         <Card>
           <CardHeader>
@@ -364,6 +340,16 @@ export function SettingsPage() {
                 Load a sample family tree with 3 generations to explore the app features.
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* About */}
+        <Card>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Info className="h-4 w-4" />About</CardTitle></CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p><strong>My Kin Map</strong> is a local-first family tree application.</p>
+            <div className="flex items-start gap-2"><Shield className="h-4 w-4 mt-0.5 flex-shrink-0" /><p>Your data stays on your device. We don't collect or store any personal information on servers.</p></div>
+            <p className="pt-2 border-t">Version 1.0.0</p>
           </CardContent>
         </Card>
 
