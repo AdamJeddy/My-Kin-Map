@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { FamilyTreeView } from '@/components/tree';
 import { PersonEditor } from '@/components/person';
 import { PersonDetails } from '@/components/person';
+import { FamilyExplorer } from '@/components/person/FamilyExplorer';
 import { MobileHeader } from '@/components/navigation';
 import { useIsMobile } from '@/hooks';
 import { useToast } from '@/hooks/useToast';
@@ -37,6 +38,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoadingSample, setIsLoadingSample] = useState(false);
+  const [mobileView, setMobileView] = useState<'family' | 'tree'>('family');
   const displayedPerson = persons?.find(person => person.id === selectedPerson?.id) ?? selectedPerson;
 
   // Initialize settings and request persistent storage on mount
@@ -86,11 +88,11 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
 
   const handleEditClose = useCallback(() => {
     setIsEditing(false);
-    if (selectedPerson) {
+    if (selectedPerson && (!isMobile || mobileView === 'tree')) {
       loadPersonRelations(selectedPerson);
       setIsDetailsOpen(true);
     }
-  }, [selectedPerson, loadPersonRelations]);
+  }, [selectedPerson, loadPersonRelations, isMobile, mobileView]);
 
   const handleLoadSampleData = useCallback(async () => {
     setIsLoadingSample(true);
@@ -152,8 +154,13 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
           </div>
         ) : (
           // Family tree view
-          <>
-            <FamilyTreeView
+          <div className="flex h-full flex-col">
+            {isMobile && <div className="flex gap-1 border-b bg-card p-1.5" role="group" aria-label="Family view">
+              <button type="button" aria-pressed={mobileView === 'family'} onClick={() => setMobileView('family')} className={`min-h-11 flex-1 rounded-lg text-sm font-medium ${mobileView === 'family' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>Family</button>
+              <button type="button" aria-pressed={mobileView === 'tree'} onClick={() => setMobileView('tree')} className={`min-h-11 flex-1 rounded-lg text-sm font-medium ${mobileView === 'tree' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>Tree</button>
+            </div>}
+            {isMobile && <div className={mobileView === 'family' ? 'min-h-0 flex-1' : 'hidden'}><FamilyExplorer persons={persons} families={families ?? []} onEdit={person => { setSelectedPerson(person); setIsEditing(true); }} /></div>}
+            {(!isMobile || mobileView === 'tree') && <div className="relative min-h-0 flex-1"><FamilyTreeView
               persons={persons ?? []}
               families={families ?? []}
               onPersonClick={handlePersonClick}
@@ -161,7 +168,9 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
               onBackgroundClick={handleCloseDetails}
             />
             {isMobile && <Button asChild variant="outline" size="sm" className="absolute top-4 left-4 z-10 rounded-full shadow-sm"><Link to="/search"><Search className="h-4 w-4" /> Find a person</Link></Button>}
-          </>
+            {!isMobile && persons.length === 1 && <div className="absolute top-5 left-5 max-w-xs rounded-xl border bg-card p-4 shadow-sm"><p className="font-medium">Your first person is in place.</p><p className="mt-1 text-sm text-muted-foreground">Open their profile to add a child or partner.</p><Button size="sm" className="mt-3" onClick={() => handlePersonClick(persons[0])}>Add a connection</Button></div>}
+            </div>}
+          </div>
         )}
       </div>
 
@@ -218,7 +227,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
         }}
         onSaved={() => {
           setIsEditing(false);
-          if (selectedPerson) {
+          if (selectedPerson && (!isMobile || mobileView === 'tree')) {
             loadPersonRelations(selectedPerson);
             setIsDetailsOpen(true);
           }
