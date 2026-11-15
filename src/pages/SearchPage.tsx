@@ -4,7 +4,7 @@ import { MobileHeader } from '@/components/navigation';
 import { PersonEditor, PersonDetails } from '@/components/person';
 import { useIsMobile } from '@/hooks';
 import { getPersonWithRelations, useFamilies, usePersons } from '@/db';
-import { Input, Avatar, AvatarFallback, AvatarImage, Dialog, DialogContent, DialogHeader, DialogTitle, Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui';
+import { Input, Avatar, AvatarFallback, AvatarImage, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui';
 import type { Person } from '@/types';
 
 export function SearchPage() {
@@ -145,7 +145,7 @@ export function SearchPage() {
       ) : (
         <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Family member</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Family member</DialogTitle><DialogDescription className="sr-only">View this person's details and family connections.</DialogDescription></DialogHeader>
             {details}
           </DialogContent>
         </Dialog>
