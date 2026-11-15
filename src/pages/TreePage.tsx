@@ -110,7 +110,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
       addToast({
         type: 'error',
         title: 'Error',
-        description: 'Failed to load sample data. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to load sample data. Please try again.',
       });
       setIsLoadingSample(false);
     }
@@ -148,7 +148,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
                   <Zap className="h-4 w-4 mr-2" />
                   {isLoadingSample ? 'Loading...' : 'Explore a sample family'}
                 </Button>
-                <p className="pt-2 text-xs leading-5 text-muted-foreground">Your family information is currently stored on this device.</p>
+                <p className="pt-2 text-xs leading-5 text-muted-foreground">The sample is saved in this browser. Use a separate browser profile to explore it without mixing it with your family.</p>
               </div>
             </div>
           </div>
@@ -168,7 +168,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
               onBackgroundClick={handleCloseDetails}
             />
             {isMobile && <Button asChild variant="outline" size="sm" className="absolute top-4 left-4 z-10 rounded-full shadow-sm"><Link to="/search"><Search className="h-4 w-4" /> Find a person</Link></Button>}
-            {!isMobile && persons.length === 1 && <div className="absolute top-5 left-5 max-w-xs rounded-xl border bg-card p-4 shadow-sm"><p className="font-medium">Your first person is in place.</p><p className="mt-1 text-sm text-muted-foreground">Open their profile to add a child or partner.</p><Button size="sm" className="mt-3" onClick={() => handlePersonClick(persons[0])}>Add a connection</Button></div>}
+            {!isMobile && persons.length === 1 && <div className="absolute top-5 left-5 max-w-xs rounded-xl border bg-card p-4 shadow-sm"><p className="font-medium">Your first person is in place.</p><p className="mt-1 text-sm text-muted-foreground">Open their profile to add a relative.</p><Button size="sm" className="mt-3" onClick={() => handlePersonClick(persons[0])}>Add a connection</Button></div>}
             </div>}
           </div>
         )}

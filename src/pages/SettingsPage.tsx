@@ -69,7 +69,7 @@ export function SettingsPage() {
       addToast({
         type: 'error',
         title: 'Error',
-        description: 'Failed to load sample data. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to load sample data. Please try again.',
       });
     } finally {
       setIsLoadingSample(false);
@@ -337,7 +337,7 @@ export function SettingsPage() {
                 {isLoadingSample ? 'Loading...' : 'Load Sample Data'}
               </Button>
               <p className="text-xs text-muted-foreground">
-                Load a sample family tree with 3 generations to explore the app features.
+                The sample is saved in this browser and can only be loaded when it contains no family data. Use a separate browser profile to explore safely.
               </p>
             </div>
           </CardContent>
