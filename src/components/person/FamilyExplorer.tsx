@@ -51,14 +51,11 @@ export function FamilyExplorer({ persons, families, onEdit }: {
   return (
     <div className="h-full overflow-y-auto bg-secondary/30">
       <div className="mx-auto max-w-xl px-4 pb-8 pt-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="font-display text-2xl leading-tight">Explore your family</h2>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">Choose a person to see the people connected to them.</p>
-          </div>
-          <Link to="/search" className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border bg-card text-foreground" aria-label="Find a person"><Search className="h-5 w-5" /></Link>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-2xl leading-tight">Your family</h2>
+          <Link to="/search" className="flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-primary hover:bg-accent"><Search className="h-4 w-4" />Find people</Link>
         </div>
-        <div className="mt-5 flex items-end gap-2">
+        <div className="mt-4 flex items-end gap-2">
           {history.length > 0 && <button type="button" onClick={goBack} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border bg-card" aria-label="Back to previous person"><ArrowLeft className="h-5 w-5" /></button>}
           <label className="min-w-0 flex-1 text-sm font-medium">Viewing
             <select value={person.id} onChange={event => { const next = persons.find(item => item.id === event.target.value); if (next) visit(next); }} className="mt-1.5 h-11 w-full rounded-xl border bg-card px-3 text-base text-foreground">
