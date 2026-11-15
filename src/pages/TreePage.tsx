@@ -13,13 +13,9 @@ import {
   DrawerHeader,
   DrawerTitle,
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui';
-import { Zap, Plus } from 'lucide-react';
+import { Zap, Plus, Sprout, Search, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface TreePageProps {
   onAddPerson?: () => void;
@@ -41,6 +37,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoadingSample, setIsLoadingSample] = useState(false);
+  const displayedPerson = persons?.find(person => person.id === selectedPerson?.id) ?? selectedPerson;
 
   // Initialize settings and request persistent storage on mount
   useEffect(() => {
@@ -60,6 +57,10 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
       });
     }
   }, []);
+
+  useEffect(() => {
+    if (selectedPerson && isDetailsOpen) loadPersonRelations(selectedPerson);
+  }, [families, selectedPerson, isDetailsOpen, loadPersonRelations]);
 
   const handlePersonClick = useCallback((person: Person) => {
     setSelectedPerson(person);
@@ -116,63 +117,56 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
   return (
     <div className="flex flex-col h-full">
       {isMobile && <MobileHeader title="Family Tree" />}
+      {!isMobile && <header className="flex min-h-24 items-center justify-between border-b bg-card px-8"><div><h1 className="font-display text-[30px] leading-tight">Your family tree</h1><p className="mt-1 text-sm text-muted-foreground">Every connection has a story.</p></div>{persons && persons.length > 0 && <span className="rounded-full bg-secondary px-4 py-2 text-xs font-medium text-secondary-foreground">{persons.length} {persons.length === 1 ? 'person' : 'people'} in your tree</span>}</header>}
       
       <div className="flex-1 relative">
-        {(!persons || persons.length === 0) ? (
+        {!persons ? (
+          <div className="flex h-full items-center justify-center text-sm text-muted-foreground" role="status">Loading your family tree…</div>
+        ) : persons.length === 0 ? (
           // Empty state
-          <div className="flex items-center justify-center h-full p-4">
-            <Card className="w-full max-w-md">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Start Your Family Tree</CardTitle>
-                <CardDescription>
-                  No family members yet. Add your first person or load sample data to explore.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
+          <div className="flex h-full items-center justify-center bg-secondary/35 p-6">
+            <div className="w-full max-w-md text-center">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-primary"><Sprout className="h-8 w-8" /></div>
+              <h2 className="font-display text-4xl leading-tight">Every family has a story.</h2>
+              <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-muted-foreground">Start with one person, then bring the people and connections that matter together.</p>
+              <div className="mt-7 space-y-3">
                 <Button
-                  variant="outline"
                   onClick={() => _onAddPerson?.()}
-                  className="w-full justify-center"
+                  className="w-full justify-center rounded-xl"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add First Person
+                  Add your first person
                 </Button>
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or try this</span>
-                  </div>
-                </div>
                 <Button
+                  variant="outline"
                   onClick={handleLoadSampleData}
                   disabled={isLoadingSample}
-                  className="w-full justify-center"
+                  className="w-full justify-center rounded-xl"
                 >
                   <Zap className="h-4 w-4 mr-2" />
-                  {isLoadingSample ? 'Loading...' : 'Load Sample Data'}
+                  {isLoadingSample ? 'Loading...' : 'Explore a sample family'}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  Load a sample family tree with 4 generations to explore features
-                </p>
-              </CardContent>
-            </Card>
+                <p className="pt-2 text-xs leading-5 text-muted-foreground">Your family information is currently stored on this device.</p>
+              </div>
+            </div>
           </div>
         ) : (
           // Family tree view
-          <FamilyTreeView
-            persons={persons ?? []}
-            families={families ?? []}
-            onPersonClick={handlePersonClick}
-            onPersonDoubleClick={handlePersonDoubleClick}
-            onBackgroundClick={handleCloseDetails}
-          />
+          <>
+            <FamilyTreeView
+              persons={persons ?? []}
+              families={families ?? []}
+              onPersonClick={handlePersonClick}
+              onPersonDoubleClick={handlePersonDoubleClick}
+              onBackgroundClick={handleCloseDetails}
+            />
+            {isMobile && <Button asChild variant="outline" size="sm" className="absolute top-4 left-4 z-10 rounded-full shadow-sm"><Link to="/search"><Search className="h-4 w-4" /> Find a person</Link></Button>}
+          </>
         )}
       </div>
 
       {/* Person Details Drawer (mobile) */}
-      {isMobile && selectedPerson && (
+      {isMobile && displayedPerson && (
         <Drawer open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
           <DrawerContent className="max-h-[80vh]">
             <DrawerHeader>
@@ -180,7 +174,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
             </DrawerHeader>
             <div className="overflow-y-auto px-4 pb-4">
               <PersonDetails
-                person={selectedPerson}
+                person={displayedPerson}
                 parents={personRelations?.parents}
                 spouses={personRelations?.spouses}
                 children={personRelations?.children}
@@ -197,10 +191,11 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
       )}
 
       {/* Person Details Panel (desktop) */}
-      {!isMobile && selectedPerson && isDetailsOpen && (
+      {!isMobile && displayedPerson && isDetailsOpen && (
         <div className="absolute top-4 right-4 w-80 max-h-[calc(100%-2rem)] overflow-y-auto bg-card/95 backdrop-blur-sm rounded-lg shadow-xl border border-border/80">
+          <div className="flex items-center justify-between border-b px-5 py-3"><span className="text-sm font-semibold">Family member</span><button type="button" onClick={handleCloseDetails} aria-label="Close person details" className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"><X className="h-4 w-4" /></button></div>
           <PersonDetails
-            person={selectedPerson}
+            person={displayedPerson}
             parents={personRelations?.parents}
             spouses={personRelations?.spouses}
             children={personRelations?.children}
@@ -216,7 +211,7 @@ export function TreePage({ onAddPerson: _onAddPerson }: TreePageProps) {
 
       {/* Person Editor */}
       <PersonEditor
-        person={selectedPerson ?? undefined}
+        person={displayedPerson ?? undefined}
         open={isEditing}
         onOpenChange={(open) => {
           if (!open) handleEditClose();

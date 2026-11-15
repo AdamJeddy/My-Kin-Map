@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Edit, Trash2, ChevronRight, CircleDot } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Edit, Trash2, ChevronRight, CircleDot, UserPlus } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -12,6 +12,8 @@ import {
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import type { Person } from '@/types';
+import { FamilyManager } from './FamilyManager';
+import { PersonEditor } from './PersonEditor';
 
 interface PersonDetailsProps {
   person: Person;
@@ -34,6 +36,7 @@ export function PersonDetails({
   onDelete,
   onPersonClick,
 }: PersonDetailsProps) {
+  const [relativeType, setRelativeType] = useState<'child' | 'partner' | null>(null);
   // Create photo URL
   const photoUrl = useMemo(() => {
     if (person.photo) {
@@ -125,15 +128,15 @@ export function PersonDetails({
   };
 
   return (
-    <Card className="bg-card/100 backdrop-blur-sm">
+    <Card className="border-0 bg-transparent shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
             {photoUrl && <AvatarImage src={photoUrl} alt={person.givenNames} />}
-            <AvatarFallback className="text-xl">{initials || '?'}</AvatarFallback>
+            <AvatarFallback className="bg-accent text-primary text-xl font-semibold">{initials || '?'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg">
+            <CardTitle className="font-display text-2xl leading-tight">
               {person.givenNames} {person.surname}
             </CardTitle>
             {person.birthName && person.birthName !== person.surname && (
@@ -148,7 +151,7 @@ export function PersonDetails({
           </div>
           <div className="flex gap-1">
             {onEdit && (
-              <Button variant="ghost" size="icon" onClick={onEdit}>
+              <Button variant="ghost" size="icon" onClick={onEdit} aria-label="Edit person">
                 <Edit className="h-4 w-4" />
               </Button>
             )}
@@ -161,6 +164,11 @@ export function PersonDetails({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" onClick={() => setRelativeType('child')}><UserPlus className="h-4 w-4 mr-2" />Add child</Button>
+          <Button variant="outline" onClick={() => setRelativeType('partner')}><UserPlus className="h-4 w-4 mr-2" />Add partner</Button>
+        </div>
+        <FamilyManager person={person} />
         {/* Vital info */}
         <div className="space-y-2">
           {birthInfo && (
@@ -185,26 +193,25 @@ export function PersonDetails({
 
         {/* Relationships */}
         <div className="border-t pt-4 space-y-3">
-          {/* Spouses & Their Children */}
+          {/* Show children separately: the aggregated list does not identify each child's other parent. */}
           {spouses.length > 0 && (
             <RelationSection 
-              title="Family"
+              title="Partners"
               bgColor="bg-primary/5 border-primary/20"
             >
               <div className="space-y-3">
                 {spouses.map((spouse) => (
                   <div key={spouse.id}>
                     <PersonMiniCard p={spouse} />
-                    {children.length > 0 && (
-                      <div className="space-y-1 mt-2">
-                        {children.map((child) => (
-                          <PersonMiniCard key={child.id} p={child} indent />
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
+            </RelationSection>
+          )}
+
+          {children.length > 0 && (
+            <RelationSection title="Children" bgColor="bg-primary/5 border-primary/20">
+              {children.map((child) => <PersonMiniCard key={child.id} p={child} />)}
             </RelationSection>
           )}
 
@@ -237,6 +244,7 @@ export function PersonDetails({
           )}
         </div>
       </CardContent>
+      {relativeType && <PersonEditor open newRelative={{ person, type: relativeType }} onOpenChange={(open) => { if (!open) setRelativeType(null); }} onSaved={onPersonClick} />}
     </Card>
   );
 }

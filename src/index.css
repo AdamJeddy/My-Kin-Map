@@ -1,120 +1,57 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* Custom CSS Variables */
+@theme inline {
+  --color-background: hsl(var(--background)); --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card)); --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover)); --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary)); --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary)); --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted)); --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent)); --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive)); --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border)); --color-input: hsl(var(--input)); --color-ring: hsl(var(--ring));
+}
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  --radius: 0.5rem;
+  --background: 42 30% 97%; --foreground: 156 20% 16%;
+  --card: 40 33% 99%; --card-foreground: 156 20% 16%;
+  --popover: 40 33% 99%; --popover-foreground: 156 20% 16%;
+  --primary: 156 37% 24%; --primary-foreground: 40 33% 98%;
+  --secondary: 41 28% 91%; --secondary-foreground: 156 20% 20%;
+  --muted: 40 22% 92%; --muted-foreground: 155 9% 37%;
+  --accent: 148 20% 90%; --accent-foreground: 156 37% 20%;
+  --destructive: 5 62% 43%; --destructive-foreground: 0 0% 100%;
+  --border: 42 16% 84%; --input: 42 16% 80%; --ring: 156 37% 34%;
+  --radius: 0.75rem; --canvas: #f1eee5; --canvas-dot: #c7c8b8;
 }
-
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --background: 155 18% 10%; --foreground: 42 25% 93%;
+  --card: 155 16% 15%; --card-foreground: 42 25% 93%;
+  --popover: 155 16% 15%; --popover-foreground: 42 25% 93%;
+  --primary: 145 28% 72%; --primary-foreground: 155 28% 12%;
+  --secondary: 155 13% 21%; --secondary-foreground: 42 25% 93%;
+  --muted: 155 13% 20%; --muted-foreground: 42 10% 72%;
+  --accent: 155 15% 24%; --accent-foreground: 42 25% 93%;
+  --destructive: 4 68% 65%; --destructive-foreground: 155 20% 10%;
+  --border: 150 11% 28%; --input: 150 11% 34%; --ring: 145 28% 65%;
+  --canvas: #18251e; --canvas-dot: #506355;
 }
-
-/* Base styles */
-* {
-  border-color: hsl(var(--border));
-}
-
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Prevent pull-to-refresh on mobile */
-html, body {
-  overscroll-behavior: none;
-}
-
-/* Safe area insets for iOS */
-.safe-area-inset-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.safe-area-inset-top {
-  padding-top: env(safe-area-inset-top);
-}
-
-/* Touch-friendly minimum sizes */
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-/* React Flow customizations */
-.react-flow__node {
-  cursor: pointer;
-}
-
-.react-flow__attribution {
-  display: none;
-}
-/* React Flow Controls styling for dark mode */
-.react-flow__controls {
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.react-flow__controls-button {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  border: 1px solid hsl(var(--border));
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.react-flow__controls-button:hover {
-  background-color: hsl(var(--muted));
-  color: hsl(var(--foreground));
-}
-
-.react-flow__controls-button:active {
-  background-color: hsl(var(--accent));
-}
-
-/* React Flow MiniMap styling for dark mode */
-.react-flow__minimap {
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-}
+* { border-color: hsl(var(--border)); }
+html, body { overscroll-behavior: none; }
+body { background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+::selection { background: #bcd8c1; color: #18392a; }
+input[type='checkbox'], input[type='radio'] { accent-color: hsl(var(--primary)); }
+:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+.safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-area-inset-top { padding-top: env(safe-area-inset-top); }
+.touch-target { min-height: 44px; min-width: 44px; }
+.font-display { font-family: Georgia, 'Times New Roman', serif; letter-spacing: -0.025em; }
+.tree-canvas { background: var(--canvas); }
+.tree-canvas .react-flow__background { color: var(--canvas-dot); }
+.react-flow__node { cursor: pointer; }
+.react-flow__attribution { display: none; }
+.react-flow__controls { overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: 0.75rem; box-shadow: 0 4px 16px #17271c12; }
+.react-flow__controls-button { background: hsl(var(--card)); color: hsl(var(--foreground)); border-color: hsl(var(--border)); }
+.react-flow__controls-button:hover { background: hsl(var(--accent)); }
+.react-flow__minimap { overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: 0.75rem; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }

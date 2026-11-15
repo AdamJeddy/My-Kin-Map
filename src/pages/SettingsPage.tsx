@@ -35,6 +35,7 @@ import {
   DialogFooter,
 } from '@/components/ui';
 import type { Settings } from '@/types';
+import { createBackup, parseBackup, restoreBackup, type Backup } from '@/lib/backup';
 
 export function SettingsPage() {
   const isMobile = useIsMobile();
@@ -45,7 +46,7 @@ export function SettingsPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [isLoadingSample, setIsLoadingSample] = useState(false);
   const [showClearDataConfirm, setShowClearDataConfirm] = useState(false);
-  const [showImportConfirm, setShowImportConfirm] = useState<{ pending: boolean; data?: any }>({ pending: false });
+  const [showImportConfirm, setShowImportConfirm] = useState<{ pending: boolean; data?: Backup }>({ pending: false });
 
   // Load storage info
   useEffect(() => {
@@ -93,35 +94,7 @@ export function SettingsPage() {
   const handleExportJSON = useCallback(async () => {
     setIsExporting(true);
     try {
-      const persons = await db.persons.toArray();
-      const families = await db.families.toArray();
-      const trees = await db.trees.toArray();
-
-      // Convert photos to base64
-      const personsWithPhotos = await Promise.all(
-        persons.map(async (person) => {
-          let photoBase64: string | undefined;
-          if (person.photo) {
-            const buffer = await person.photo.arrayBuffer();
-            photoBase64 = btoa(
-              new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-            );
-          }
-          return {
-            ...person,
-            photo: photoBase64,
-            photoThumbnail: undefined, // Don't export thumbnails
-          };
-        })
-      );
-
-      const exportData = {
-        version: 1,
-        exportDate: new Date().toISOString(),
-        persons: personsWithPhotos,
-        families,
-        trees,
-      };
+      const exportData = await createBackup();
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: 'application/json',
@@ -164,21 +137,8 @@ export function SettingsPage() {
       setIsImporting(true);
       try {
         const text = await file.text();
-        const data = JSON.parse(text);
-
-        if (!data.version || !data.persons) {
-          throw new Error('Invalid backup file format');
-        }
-
-        // Show confirmation
-        setShowImportConfirm({ 
-          pending: true, 
-          data: {
-            ...data,
-            personCount: data.persons.length,
-            familyCount: data.families?.length ?? 0,
-          }
-        });
+        const data = parseBackup(text);
+        setShowImportConfirm({ pending: true, data });
       } catch (error) {
         console.error('Import failed:', error);
         addToast({
@@ -197,50 +157,7 @@ export function SettingsPage() {
     if (!showImportConfirm.data) return;
 
     try {
-      const data = showImportConfirm.data;
-
-      // Import persons
-      for (const person of data.persons) {
-        // Convert base64 photo back to Blob
-        let photoBlob: Blob | undefined;
-        if (person.photo && typeof person.photo === 'string') {
-          const binary = atob(person.photo);
-          const bytes = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
-          }
-          photoBlob = new Blob([bytes]);
-        }
-
-        await db.persons.put({
-          ...person,
-          photo: photoBlob,
-          createdAt: new Date(person.createdAt),
-          updatedAt: new Date(person.updatedAt),
-        });
-      }
-
-      // Import families
-      if (data.families) {
-        for (const family of data.families) {
-          await db.families.put({
-            ...family,
-            createdAt: new Date(family.createdAt),
-            updatedAt: new Date(family.updatedAt),
-          });
-        }
-      }
-
-      // Import trees
-      if (data.trees) {
-        for (const tree of data.trees) {
-          await db.trees.put({
-            ...tree,
-            createdAt: new Date(tree.createdAt),
-            updatedAt: new Date(tree.updatedAt),
-          });
-        }
-      }
+      await restoreBackup(showImportConfirm.data);
 
       addToast({
         type: 'success',
@@ -311,8 +228,9 @@ export function SettingsPage() {
   return (
     <div className="flex flex-col h-full">
       {isMobile && <MobileHeader title="Settings" />}
+      {!isMobile && <header className="border-b bg-card px-8 py-6"><h1 className="font-display text-[30px] leading-tight">Settings</h1><p className="mt-1 text-sm text-muted-foreground">Manage your preferences and family data.</p></header>}
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 md:pb-4">
+      <div className="flex-1 overflow-y-auto p-4 pb-8 md:p-8"><div className="mx-auto max-w-4xl space-y-4">
         {/* About */}
         <Card>
           <CardHeader>
@@ -385,7 +303,7 @@ export function SettingsPage() {
               Data Management
             </CardTitle>
             <CardDescription>
-              Your data is stored locally on this device
+              Your family data is stored in this browser on this device. Export a backup regularly so you can recover it if you lose the device or clear browser data.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -468,7 +386,7 @@ export function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </div></div>
 
       {/* Clear Data Confirmation Dialog */}
       <Dialog open={showClearDataConfirm} onOpenChange={setShowClearDataConfirm}>
@@ -496,7 +414,7 @@ export function SettingsPage() {
           <DialogHeader>
             <DialogTitle>Import Backup?</DialogTitle>
             <DialogDescription>
-              This will import {showImportConfirm.data?.personCount} people and {showImportConfirm.data?.familyCount} families. Existing data with the same IDs will be overwritten. Continue?
+              This will import {showImportConfirm.data?.persons.length} people and {showImportConfirm.data?.families.length} families. Existing data with the same IDs will be overwritten. Continue?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

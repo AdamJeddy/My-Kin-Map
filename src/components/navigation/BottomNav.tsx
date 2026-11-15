@@ -1,57 +1,19 @@
 import { NavLink } from 'react-router-dom';
-import { TreePine, Search, Settings, Plus } from 'lucide-react';
+import { Network, Search, Settings, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface BottomNavProps {
-  onAddClick?: () => void;
-}
-
-export function BottomNav({ onAddClick }: BottomNavProps) {
-  const navItems = [
-    { to: '/', icon: TreePine, label: 'Tree' },
-    { to: '/search', icon: Search, label: 'Search' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
-  ];
-
+export function BottomNav({ onAddClick }: { onAddClick?: () => void }) {
+  const items = [{ to: '/', icon: Network, label: 'Tree' }, { to: '/search', icon: Search, label: 'People' }, { to: '/settings', icon: Settings, label: 'Settings' }];
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-inset-bottom">
-      <div className="flex items-center justify-around h-16">
-        {navItems.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              cn(
-                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors touch-target',
-                'text-foreground/60 hover:text-foreground hover:bg-muted/50',
-                isActive && 'text-primary bg-primary/10'
-              )
-            }
-          >
-            <Icon className="h-5 w-5" />
-            <span className="text-xs font-medium">{label}</span>
-          </NavLink>
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card safe-area-inset-bottom">
+      <div className="flex h-[68px] items-center justify-around px-2">
+        {items.map(({to, icon: Icon, label}, index) => (
+          <div key={to} className="contents">
+            {index === 2 && <button onClick={onAddClick} aria-label="Add person" className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground"><Plus className="h-5 w-5" /></button>}
+            <NavLink to={to} end={to === '/'} className={({isActive}) => cn('flex min-w-15 flex-col items-center gap-1 rounded-lg px-3 py-2 text-[11px] font-medium text-muted-foreground', isActive && 'text-primary')}><Icon className="h-5 w-5" /><span>{label}</span></NavLink>
+          </div>
         ))}
       </div>
-
-      {/* Floating Add Button */}
-      <button
-        onClick={onAddClick}
-        style={{
-          backgroundColor: 'hsl(var(--primary))',
-          color: 'hsl(var(--primary-foreground))',
-        }}
-        className={cn(
-          'absolute -top-20 left-6',
-          'flex items-center justify-center',
-          'w-14 h-14 rounded-full shadow-lg',
-          'hover:opacity-90 active:scale-95 transition-transform',
-          'touch-target'
-        )}
-        aria-label="Add person"
-      >
-        <Plus className="h-6 w-6" />
-      </button>
     </nav>
   );
 }

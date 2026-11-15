@@ -1,9 +1,7 @@
 # My Kin Map
 ## Why I Built This
 
-I couldn't find a family tree solution that met my needs: completely free, fully secure, and with complete data ownership. Most existing tools either charge money, store your sensitive family information on their servers, or make it difficult to export your data. 
-
-**My Kin Map is different.** Everything runs in your browser. Your family data never leaves your device it's stored locally using IndexedDB. You have complete control over your information, and you can export it anytime for backup or future use.
+My Kin Map is an early family tree application for bringing family relationships and memories together. It currently stores family records in this browser using IndexedDB and supports JSON backup and restore. There is no account or automatic cross-device sync in the current implementation.
 
 **Live Demo:** [https://my-kin-map.vercel.app/](https://my-kin-map.vercel.app/)
 
@@ -16,7 +14,7 @@ I couldn't find a family tree solution that met my needs: completely free, fully
 - **Relationship Tracking** - Define spouse, parent, and child relationships
 - **Smart Layout** - Automatic hierarchical layout with compound couple nodes for married pairs
 - **Local Storage** - Data persists in your browser with IndexedDB
-- **GEDCOM Import** - Import family trees from standard GEDCOM files
+- **JSON Backup** - Export and restore family data and photos
 - **Responsive Design** - Works on desktop and mobile devices
 
 ## Tech Stack
@@ -31,7 +29,7 @@ I couldn't find a family tree solution that met my needs: completely free, fully
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 20.19+, 22.12+, or 24+ (the supported LTS lines for the build and test tools)
 - npm or yarn
 
 ### Installation
@@ -66,14 +64,14 @@ This creates an optimized build in the `dist/` directory.
 
 ### Creating a Family Tree
 
-1. **Add People** - Use the "Add Person" button to create family members
-2. **Link Relationships** - Connect people with spouse, parent, and child relationships
-3. **View Tree** - The tree automatically layouts as you add relationships
-4. **Zoom & Pan** - Use mouse wheel to zoom, click and drag to pan around the tree
+1. **Add people** - Use the add button to create family members, or explore with the sample data.
+2. **Link relationships** - Open a person's profile to add relatives or manage individual family groups.
+3. **Explore** - Use the tree and people list to find a person; zoom and pan the tree as needed.
+4. **Back up** - Export a JSON backup from Settings and keep it somewhere safe.
 
-### Your Data is Safe
+### Back up your data
 
-All information is stored locally in your browser's storage. No data is sent to any server. When you close the app, your data remains on your device, ready for your next visit.
+Family information is currently stored in this browser on this device. It is not automatically synced to another device. Clearing browser data or losing the device can remove it, so export a backup from Settings regularly and keep it somewhere safe. Importing a backup merges records and replaces existing records with matching IDs.
 
 ## Project Structure
 
@@ -85,12 +83,13 @@ src/
 │   │   ├── PersonNode.tsx        # Individual person node
 │   │   ├── CoupleNode.tsx        # Married couple compound node
 │   │   └── layout.ts             # Tree layout algorithm
-│   ├── form/              # Data entry forms
+│   ├── person/            # Profiles and relationship editing
 │   └── ui/                # Reusable UI components
 ├── lib/
-│   ├── db.ts              # IndexedDB schema and operations
-│   ├── gedcom.ts          # GEDCOM import/export
+│   ├── backup.ts          # JSON backup validation and restore
+│   ├── gedcom/            # GEDCOM utilities (not exposed in the UI)
 │   └── utils.ts           # Utility functions
+├── db/                    # IndexedDB schema and relationship operations
 ├── types/
 │   └── index.ts           # TypeScript type definitions
 └── App.tsx                # Main app component
@@ -103,31 +102,23 @@ src/
 - `npm run dev` - Start development server with HMR
 - `npm run build` - Build for production
 - `npm run lint` - Run ESLint
+- `npm test` - Run the automated tests
 - `npm run preview` - Preview production build locally
 
 ## Data Format
 
-The app stores family data with the following structure:
+The current model keeps people and family groups as separate records. See `src/types/index.ts` for the actual types and `src/lib/backup.ts` for the JSON backup format and restore validation. GEDCOM utilities exist but are not currently exposed as a supported import/export flow.
 
-```typescript
-interface Person {
-  id: string;
-  firstName: string;
-  lastName: string;
-  birthDate?: string;
-  deathDate?: string;
-  spouseIds: string[];
-  parentIds: string[];
-  childIds: string[];
-}
-```
+## Project handover
+
+- [Implementation handover](docs/revival-review/HANDOVER.md): changes, verification, limitations and suggested next work.
+- [Implementation status](docs/revival-review/IMPLEMENTATION-STATUS.md): detailed progress since the original assessment.
+- [Revival review and product plan](docs/revival-review/REPORT.md): original findings and product opportunities; some findings have since been addressed.
+- [Product direction](PRODUCT.md) and [design direction](DESIGN.md).
 
 ## Contributing
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest features
-- Submit pull requests
+Please review the repository's license before using or contributing code.
 
 ## Roadmap
 
@@ -139,7 +130,7 @@ Contributions are welcome! Feel free to:
 
 ## Support
 
-For issues, questions, or feedback, please open an issue on GitHub or reach out through the contact form on the live site.
+For issues, questions, or feedback, please open an issue on GitHub.
 
 ---
 
