@@ -4,6 +4,21 @@ import type { Family, Person } from '../../types';
 import { autoLayoutTree, generateTreeLayout } from './layout';
 
 describe('family tree layout', () => {
+  it('shows siblings with no recorded parents as siblings rather than inventing a parent', () => {
+    const people = sample.persons.slice(0, 2) as unknown as Person[];
+    const group = { ...(sample.families[0] as unknown as Family), id: 'siblings', spouse1Id: undefined, spouse2Id: undefined, childIds: people.map(p => p.id) };
+    const result = generateTreeLayout(people, [group], undefined);
+    expect(result.edges).toHaveLength(1);
+    expect(result.edges[0].id).toMatch(/^sibling-/);
+  });
+  it('does not show co-parents as partners', () => {
+    const people = sample.persons.slice(0, 3) as unknown as Person[];
+    const group = { ...(sample.families[0] as unknown as Family), id: 'coparents', spouse1Id: people[0].id, spouse2Id: people[1].id, childIds: [people[2].id], coParentsOnly: true };
+    const result = generateTreeLayout(people, [group], undefined);
+    expect(result.nodes.every(node => node.type === 'person')).toBe(true);
+    expect(result.edges.some(edge => edge.id.startsWith('partner-'))).toBe(false);
+    expect(result.edges.filter(edge => edge.id.startsWith('parent-'))).toHaveLength(2);
+  });
   it('shows every relationship when the first person is a child and a parent has multiple partners', () => {
     const people = sample.persons as unknown as Person[];
     const families = sample.families as unknown as Family[];

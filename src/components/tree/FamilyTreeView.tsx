@@ -224,11 +224,11 @@ function FamilyTreeViewInner({
       >
         <Background gap={24} size={1} color="var(--canvas-dot)" />
 
-        {edges.some(edge => edge.id.startsWith('partner-')) && (
+        {edges.some(edge => edge.id.startsWith('partner-') || edge.id.startsWith('sibling-')) && (
           <Panel position="top-left" className={isMobile ? '!mt-14' : ''}>
-            <div className="flex items-center gap-2 rounded-md border bg-background/95 px-3 py-2 text-xs text-muted-foreground shadow-sm">
-              <span className="w-5 border-t-2 border-dashed border-[#bc7861]" aria-hidden="true" />
-              Dashed line: partners
+            <div className="space-y-1 rounded-md border bg-background/95 px-3 py-2 text-xs text-muted-foreground shadow-sm">
+              {edges.some(edge => edge.id.startsWith('partner-')) && <div className="flex items-center gap-2"><span className="w-5 border-t-2 border-dashed border-[#bc7861]" aria-hidden="true" />Dashed line: partners</div>}
+              {edges.some(edge => edge.id.startsWith('sibling-')) && <div className="flex items-center gap-2"><span className="w-5 border-t-2 border-dashed border-[#6e8ca0]" aria-hidden="true" />Dashed line: siblings with no parents recorded</div>}
             </div>
           </Panel>
         )}

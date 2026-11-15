@@ -36,7 +36,7 @@ export function PersonDetails({
   onDelete,
   onPersonClick,
 }: PersonDetailsProps) {
-  const [relativeType, setRelativeType] = useState<'child' | 'partner' | null>(null);
+  const [relativeType, setRelativeType] = useState<'child' | 'partner' | 'parent' | 'sibling' | null>(null);
   // Create photo URL
   const photoUrl = useMemo(() => {
     if (person.photo) {
@@ -165,6 +165,8 @@ export function PersonDetails({
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" className="min-w-0 px-2" onClick={() => setRelativeType('child')}><UserPlus className="h-4 w-4 shrink-0 mr-1" />Add child</Button>
           <Button variant="outline" className="min-w-0 px-2" onClick={() => setRelativeType('partner')}><UserPlus className="h-4 w-4 shrink-0 mr-1" />Add partner</Button>
+          <Button variant="outline" className="min-w-0 px-2" onClick={() => setRelativeType('parent')}><UserPlus className="h-4 w-4 shrink-0 mr-1" />Add parent</Button>
+          <Button variant="outline" className="min-w-0 px-2" onClick={() => setRelativeType('sibling')}><UserPlus className="h-4 w-4 shrink-0 mr-1" />Add sibling</Button>
         </div>
         {/* Relationships */}
         <div className="space-y-3">

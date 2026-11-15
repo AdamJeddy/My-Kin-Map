@@ -338,7 +338,7 @@ export async function getPersonWithRelations(personId: string) {
   }
 
   // Get spouses
-  const spouseIds = spouseFamilies
+  const spouseIds = spouseFamilies.filter(f => !f.coParentsOnly)
     .map(f => f.spouse1Id === personId ? f.spouse2Id : f.spouse1Id)
     .filter(Boolean) as string[];
   const spouses = await db.persons.bulkGet(spouseIds).then(p => p.filter(Boolean) as Person[]);

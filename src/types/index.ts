@@ -37,6 +37,7 @@ export interface Person extends SyncableEntity {
 export interface Family extends SyncableEntity {
   spouse1Id?: string; // Person ID
   spouse2Id?: string; // Person ID
+  coParentsOnly?: boolean; // Both people are parents; their partnership is not asserted
   marriageDate?: DatePlace;
   divorceDate?: DatePlace;
   childIds: string[]; // Ordered list of Person IDs

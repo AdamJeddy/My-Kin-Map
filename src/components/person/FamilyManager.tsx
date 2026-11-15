@@ -22,7 +22,7 @@ export function FamilyManager({ person }: { person: Person }) {
   const partnerOf = (family: Family) => family.spouse1Id === person.id ? family.spouse2Id : family.spouse1Id;
   const nameOf = (id?: string) => {
     const found = people.find(p => p.id === id);
-    return found ? `${found.givenNames} ${found.surname}` : 'No partner';
+    return found ? `${found.givenNames} ${found.surname}` : 'No other parent or partner';
   };
   const selectFamily = (id: string) => {
     const family = families.find(f => f.id === id);
@@ -54,7 +54,7 @@ export function FamilyManager({ person }: { person: Person }) {
       <DialogContent className="max-w-lg max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Manage family groups</DialogTitle>
-          <DialogDescription>Choose a partner and the children they share with {person.givenNames}. Each group is edited separately.</DialogDescription>
+          <DialogDescription>{selectedFamily?.coParentsOnly ? 'Edit the other parent and children in this group. This does not record a partnership.' : 'Choose a partner and the children in this group. Each group is edited separately.'}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -62,17 +62,17 @@ export function FamilyManager({ person }: { person: Person }) {
             <Select value={familyId} onValueChange={selectFamily}>
               <SelectTrigger id="family-group"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {families.map(f => <SelectItem key={f.id} value={f.id}>{nameOf(partnerOf(f))} · {f.childIds.length} {f.childIds.length === 1 ? 'child' : 'children'}</SelectItem>)}
+                {families.map(f => <SelectItem key={f.id} value={f.id}>{nameOf(partnerOf(f))}{f.coParentsOnly ? ' (co-parent)' : ''} · {f.childIds.length} {f.childIds.length === 1 ? 'child' : 'children'}</SelectItem>)}
                 <SelectItem value="new">Add a family group</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="family-partner">Partner</label>
+            <label className="text-sm font-medium" htmlFor="family-partner">{selectedFamily?.coParentsOnly ? 'Other parent' : 'Partner'}</label>
             <Select value={partnerId} onValueChange={(value) => { setPartnerId(value); setAcknowledged(false); }}>
               <SelectTrigger id="family-partner"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No partner recorded</SelectItem>
+                <SelectItem value="none">None recorded</SelectItem>
                 {people.filter(p => p.id !== person.id).map(p => <SelectItem key={p.id} value={p.id}>{p.givenNames} {p.surname}</SelectItem>)}
               </SelectContent>
             </Select>

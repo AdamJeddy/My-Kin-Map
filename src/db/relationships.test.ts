@@ -47,4 +47,11 @@ describe('relationship reconciliation', () => {
     expect(groups.some(f => [f.spouse1Id, f.spouse2Id].includes(partner.id) && [f.spouse1Id, f.spouse2Id].includes('p'))).toBe(true);
     expect((await db.families.get('f1'))?.childIds).toEqual(['c1']);
   });
+  it('records an explicitly selected partner when a co-parent group already exists', async () => {
+    await db.families.update('f1', { coParentsOnly: true });
+    await reconcileRelationships('s1', { parentIds: [], spouseId: 'p', childIds: ['c1'] });
+    expect((await db.families.get('f1'))?.coParentsOnly).toBe(false);
+    expect((await db.families.get('f1'))?.childIds).toEqual(['c1']);
+    expect(await db.families.count()).toBe(2);
+  });
 });

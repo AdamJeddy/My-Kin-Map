@@ -63,7 +63,7 @@ export function FamilyExplorer({ persons, families, onEdit }: {
             </select>
           </label>
         </div>
-        {persons.length === 1 && <p className="mt-5 rounded-xl bg-accent px-4 py-3 text-sm leading-5 text-accent-foreground">A family starts with a connection. Add a child or partner below, or use the add button to create another person.</p>}
+        {persons.length === 1 && <p className="mt-5 rounded-xl bg-accent px-4 py-3 text-sm leading-5 text-accent-foreground">A family starts with a connection. Choose how someone is related to {person.givenNames} below.</p>}
         <div className="mt-5 overflow-hidden rounded-2xl border bg-card">
           <PersonDetails key={person.id} person={person} parents={currentRelations?.parents} spouses={currentRelations?.spouses}
             children={currentRelations?.children} siblings={currentRelations?.siblings} onEdit={() => onEdit(person)} onPersonClick={visit} />

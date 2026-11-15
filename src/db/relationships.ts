@@ -1,5 +1,6 @@
 import { addChildToFamily, getOrCreateFamily, getPersonWithRelations, linkParentsToChild, removeChildFromFamily } from './hooks';
 import { db } from './schema';
+import { v4 as uuid } from 'uuid';
 
 export interface RelationshipSelection {
   parentIds: string[];
@@ -60,6 +61,9 @@ export async function reconcileRelationships(personId: string, selection: Relati
   const newChildren = selection.childIds.filter(id => !existingChildren.has(id));
   if (newChildren.length || (selection.spouseId && !existingSpouses.has(selection.spouseId))) {
     const family = await getOrCreateFamily(personId, selection.spouseId);
+    if (selection.spouseId && family.coParentsOnly) {
+      await db.families.update(family.id, { coParentsOnly: false, _rev: uuid(), updatedAt: new Date() });
+    }
     for (const childId of newChildren) await addChildToFamily(family.id, childId);
   }
 }

@@ -31,9 +31,11 @@ interface PersonFormProps {
   families?: Family[];
   onCancel: () => void;
   isSubmitting?: boolean;
+  submitDisabled?: boolean;
+  hideRelationships?: boolean;
 }
 
-export function PersonForm({ person, persons = [], families = [], relations, onSubmit, onCancel, isSubmitting }: PersonFormProps) {
+export function PersonForm({ person, persons = [], families = [], relations, onSubmit, onCancel, isSubmitting, submitDisabled, hideRelationships = false }: PersonFormProps) {
   const [formData, setFormData] = useState<PersonFormData>({
     givenNames: person?.givenNames ?? '',
     surname: person?.surname ?? '',
@@ -49,6 +51,7 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showRelations, setShowRelations] = useState<boolean>(false);
+  const [showOptionalDetails, setShowOptionalDetails] = useState(!hideRelationships);
 
   const [relationState, setRelationState] = useState<RelationSelections>(() => relations ?? {
     parentIds: [],
@@ -65,8 +68,8 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
   }, [relations]);
 
   // Create preview from existing photo
-  const existingPhotoUrl = person?.photo 
-    ? URL.createObjectURL(person.photo) 
+  const existingPhotoUrl = person?.photo
+    ? URL.createObjectURL(person.photo)
     : null;
 
   const handleChange = useCallback((
@@ -188,13 +191,39 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Name fields */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor="givenNames">Given Names *</Label>
+          <Input
+            id="givenNames"
+            value={formData.givenNames}
+            onChange={(e) => handleChange('givenNames', e.target.value)}
+            placeholder="First name(s)"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="surname">Surname *</Label>
+          <Input
+            id="surname"
+            value={formData.surname}
+            onChange={(e) => handleChange('surname', e.target.value)}
+            placeholder="Last name"
+            required
+          />
+        </div>
+      </div>
+
+      {hideRelationships && <Button type="button" variant="ghost" className="w-full justify-start px-0" aria-expanded={showOptionalDetails} aria-controls="optional-person-details" onClick={() => setShowOptionalDetails(value => !value)}>{showOptionalDetails ? 'Hide optional details' : 'Add optional details'}</Button>}
+      <div id="optional-person-details" hidden={hideRelationships && !showOptionalDetails} className="space-y-4">
       {/* Photo upload */}
       <div className="flex flex-col items-center gap-3">
         <div className="relative">
           <Avatar className="h-24 w-24">
-            <AvatarImage 
-              src={photoPreview || existingPhotoUrl || undefined} 
-              alt="Photo preview" 
+            <AvatarImage
+              src={photoPreview || existingPhotoUrl || undefined}
+              alt="Photo preview"
             />
             <AvatarFallback className="text-2xl">
               {initials || '?'}
@@ -230,30 +259,6 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
             <Camera className="h-4 w-4 mr-2" />
             {photoPreview || existingPhotoUrl ? 'Change Photo' : 'Add Photo'}
           </Button>
-        </div>
-      </div>
-
-      {/* Name fields */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="givenNames">Given Names *</Label>
-          <Input
-            id="givenNames"
-            value={formData.givenNames}
-            onChange={(e) => handleChange('givenNames', e.target.value)}
-            placeholder="First name(s)"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="surname">Surname *</Label>
-          <Input
-            id="surname"
-            value={formData.surname}
-            onChange={(e) => handleChange('surname', e.target.value)}
-            placeholder="Last name"
-            required
-          />
         </div>
       </div>
 
@@ -330,8 +335,10 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
         />
       </div>
 
+      </div>
+
       {/* Relationships (optional) */}
-      <div className="space-y-3 border-t pt-4">
+      {!hideRelationships && <div className="space-y-3 border-t pt-4">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium">Relationships (optional)</p>
           <Button
@@ -436,7 +443,7 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">
@@ -452,7 +459,7 @@ export function PersonForm({ person, persons = [], families = [], relations, onS
         <Button
           type="submit"
           className="flex-1"
-          disabled={isSubmitting || !formData.givenNames || !formData.surname}
+          disabled={isSubmitting || submitDisabled || !formData.givenNames || !formData.surname}
         >
           {isSubmitting ? 'Saving...' : person ? 'Update' : 'Add Person'}
         </Button>

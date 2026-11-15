@@ -64,6 +64,7 @@ export function parseBackup(text: string): Backup {
   const families = records(data.families ?? []).map(record => {
     if (!Array.isArray(record.childIds) || !record.childIds.every(requiredString) ||
         !['married', 'partnership', 'unknown'].includes(String(record.type)) ||
+        (record.coParentsOnly !== undefined && typeof record.coParentsOnly !== 'boolean') ||
         (record.spouse1Id !== undefined && !requiredString(record.spouse1Id)) ||
         (record.spouse2Id !== undefined && !requiredString(record.spouse2Id)) || !datePlace(record.marriageDate) || !datePlace(record.divorceDate)) throw new Error('Invalid family');
     return { ...record, createdAt: new Date(record.createdAt as string), updatedAt: new Date(record.updatedAt as string) } as unknown as Family;

@@ -33,6 +33,10 @@ describe('backup and restore', () => {
     expect(await db.persons.toArray()).toEqual([person]);
   });
 
+  it('rejects an invalid co-parent marker', () => {
+    expect(() => parseBackup(JSON.stringify({ version: 1, persons: [person], families: [{ id: 'f', _rev: 'r', createdAt: now, updatedAt: now, childIds: [], type: 'unknown', coParentsOnly: 'yes' }], trees: [] }))).toThrow('Invalid family');
+  });
+
   it('rejects broken links without overwriting the current data', async () => {
     await db.persons.add(person);
     const backup = parseBackup(JSON.stringify({ version: 1, persons: [{ ...person, givenNames: 'Changed' }], families: [{ id: 'f', _rev: 'r', createdAt: now, updatedAt: now, spouse1Id: 'missing', childIds: [], type: 'unknown' }], trees: [] }));

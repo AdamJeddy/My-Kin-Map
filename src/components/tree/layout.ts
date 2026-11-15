@@ -61,7 +61,7 @@ export function generateTreeLayout(
   for (const family of families) {
     const first = family.spouse1Id && personMap.get(family.spouse1Id);
     const second = family.spouse2Id && personMap.get(family.spouse2Id);
-    if (!first || !second || first.id === second.id || !family.childIds.length ||
+    if (!first || !second || family.coParentsOnly || first.id === second.id || !family.childIds.length ||
         groupsByPerson.get(first.id)?.length !== 1 || groupsByPerson.get(second.id)?.length !== 1) continue;
     const couple = { id: `couple-${[first.id, second.id].sort().join('-')}`, first, second };
     coupleByPerson.set(first.id, couple);
@@ -87,22 +87,25 @@ export function generateTreeLayout(
 
   const edges: Edge[] = [];
   const edgeIds = new Set<string>();
-  const addEdge = (source: string, target: string, spouse: boolean) => {
+  const addEdge = (source: string, target: string, kind: 'partner' | 'parent' | 'sibling') => {
     if (!personMap.has(source) || !personMap.has(target)) return;
     const sourceNode = coupleByPerson.get(source)?.id ?? source;
     const targetNode = coupleByPerson.get(target)?.id ?? target;
     if (sourceNode === targetNode) return;
-    const id = `${spouse ? 'partner' : 'parent'}-${sourceNode}-${targetNode}`;
+    const id = `${kind}-${sourceNode}-${targetNode}`;
     if (edgeIds.has(id)) return;
     edgeIds.add(id);
     edges.push({ id, source: sourceNode, target: targetNode, type: 'smoothstep',
-      style: { stroke: spouse ? '#bc7861' : '#829787', strokeWidth: spouse ? 3 : 2, strokeDasharray: spouse ? '5,5' : undefined } });
+      style: { stroke: kind === 'partner' ? '#bc7861' : kind === 'sibling' ? '#6e8ca0' : '#829787', strokeWidth: kind === 'partner' ? 3 : 2, strokeDasharray: kind === 'parent' ? undefined : '5,5' } });
   };
   // Construct links from every family, independent of which person happens to be first.
   for (const family of families) {
-    if (family.spouse1Id && family.spouse2Id) addEdge(family.spouse1Id, family.spouse2Id, true);
+    if (family.spouse1Id && family.spouse2Id && !family.coParentsOnly) addEdge(family.spouse1Id, family.spouse2Id, 'partner');
+    if (!family.spouse1Id && !family.spouse2Id) {
+      for (let i = 1; i < family.childIds.length; i++) addEdge(family.childIds[i - 1], family.childIds[i], 'sibling');
+    }
     for (const parent of [family.spouse1Id, family.spouse2Id]) {
-      if (parent) for (const child of family.childIds) addEdge(parent, child, false);
+      if (parent) for (const child of family.childIds) addEdge(parent, child, 'parent');
     }
   }
   return { nodes, edges };
@@ -143,7 +146,7 @@ export function autoLayoutTree(
 
   // Add edges to graph
   edges.forEach(edge => {
-    g.setEdge(edge.source, edge.target);
+    if (!edge.id.startsWith('sibling-')) g.setEdge(edge.source, edge.target);
   });
 
   // Run layout algorithm
